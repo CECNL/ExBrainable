@@ -1,0 +1,22 @@
+name: visscc_v4
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+- mkl
+- matplotlib
+- numpy
+- pip
+- python>=3.7 
+- h5py
+- pytorch
+- pytest
+- scipy
+- tk
+- torchaudio
+- torchvision
+- pip:
+  - mne 
+  
+
