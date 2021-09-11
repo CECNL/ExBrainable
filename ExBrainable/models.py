@@ -1,3 +1,6 @@
+# Authors: Ya-Lin Huang <yalinhuang.bt06@nycu.edu.tw>
+#          Xin-Yao Huang <masaga.cs05@nctu.edu.tw>
+
 import torch
 import torch.nn as nn
 import math
@@ -26,7 +29,7 @@ class EEGNet(nn.Module):
         self.conv1 = nn.Sequential(  
         #temporal kernel size(1, floor(sf*0.5)) means 500ms EEG at sf/2
         #padding=(0, floor(sf*0.5)/2) maintain raw data shape 
-            nn.Conv2d(1, self.F1, (1, int(self.half_sf)), padding=(0, int(self.half_sf/2)), bias=False),
+            nn.Conv2d(1, self.F1, (1, self.half_sf), padding=(0, math.ceil(self.half_sf/2)), bias=False), #62,32
             nn.BatchNorm2d(self.F1)
         )
 
@@ -41,7 +44,7 @@ class EEGNet(nn.Module):
 
         self.Conv3 = nn.Sequential(
         # kernel size=(1, floor((sf/4))*0.5) means 500ms EEG at sf/4 Hz 
-            nn.Conv2d(self.D*self.F1, self.D*self.F1, (1, int(self.half_sf/4)), padding=(0, int(self.half_sf/8)), groups=self.D*self.F1, bias=False),
+            nn.Conv2d(self.D*self.F1, self.D*self.F1, (1, math.floor(self.half_sf/4)), padding=(0, 8), groups=self.D*self.F1, bias=False),
             nn.Conv2d(self.D*self.F1, self.F2, (1, 1), bias=False),
             nn.BatchNorm2d(self.F2),
             nn.ELU(),
@@ -50,18 +53,18 @@ class EEGNet(nn.Module):
         )
         
         #(floor((sf/4))/2 * timepoint//32, n_class)
-        self.classifier = nn.Linear(int(self.half_sf/4)* int(self.tp//32), self.n_class, bias=True)
+        self.classifier = nn.Linear(math.ceil(self.half_sf/4)* math.ceil(self.tp//32), self.n_class, bias=True)
        
     def forward(self, x):
         x = self.conv1(x)
-        #print(x.shape)
+        print(x.shape)
         x = self.conv2(x)
-        #print(x.shape)
+        print(x.shape)
         x = self.Conv3(x)
-        #print(x.shape)
+        print(x.shape)
         #(-1, sf/8* timepoint//32)
-        x = x.view(-1, int(self.half_sf/4)* int(self.tp//32))
-        #print(x.shape)
+        x = x.view(-1, self.F2* (self.tp//32))
+        print(x.shape)
         x = self.classifier(x)
        
         return x

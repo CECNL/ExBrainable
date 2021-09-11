@@ -1,4 +1,4 @@
-name: visscc_v4
+name: ExBrainable
 channels:
   - pytorch
   - conda-forge
@@ -18,5 +18,7 @@ dependencies:
 - torchvision
 - pip:
   - mne 
+  - torchsummary
+  - sklearn
   
 

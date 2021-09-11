@@ -10,14 +10,14 @@ with open(path.join(here, "README.md"),"r") as fh:
 
 setuptools.setup(
      name='ExBrainable',  
-     version='0.0.2',  
+     version='0.0.3',  
      author="Ya-Lin Huang", 
      author_email="yalinhuang.bt06@nycu.edu.tw",
-     description="~",
+     description="ExBrainable: An Open-Source GUI for CNN-based EEG Decoding and Model Interpretation",
      long_description=long_description,
      long_description_content_type="text/markdown",
-     url="https://github.com/skywalkerylh/ExBrainable",
-     install_requires=['mne', 'numpy', 'scipy', 'matplotlib'],
+     url="https://github.com/CECNL/ExBrainable",
+     install_requires=['mne', 'numpy', 'scipy', 'matplotlib','torchsummary', 'sklearn'],
      packages=setuptools.find_packages(), #Use for other package dependencies.
      classifiers=[
         #'Development Status :: 3 - Alpha',  #not sure 
