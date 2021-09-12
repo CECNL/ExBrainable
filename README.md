@@ -21,6 +21,8 @@ python GUI.py
 pip install ExBrainable
 ```
 # Video demonstration 
+This is a brief video demonstration of ExBrainable : https://youtu.be/m40z2klbmtg
+# Documentation
 # Citing
 1. ExBrainble on arxiv
 2. mne-python 
