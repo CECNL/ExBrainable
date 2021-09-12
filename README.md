@@ -13,7 +13,6 @@ conda activate ExBrainable
 python GUI.py
 ```
 ## 2. In programming 
-* Install pip package ExBrainable 
 1. Install Python >= 3.7
 2. Install Pytorch >= 1.0 from http://pytorch.org/ 
 3. Use the package manager pip to install ExBrainable
