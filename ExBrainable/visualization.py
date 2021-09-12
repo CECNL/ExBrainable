@@ -2,8 +2,8 @@
 #          Chia-Ying Hsieh <irishsieh0720.cs07@nycu.edu.tw>
 
 
-from models import * 
-import scheme_var
+from .models import * 
+from . import scheme_var
 
 import numpy as np
 import matplotlib.pyplot as plt

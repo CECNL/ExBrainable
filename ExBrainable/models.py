@@ -4,7 +4,8 @@
 import torch
 import torch.nn as nn
 import math
-import scheme_var
+from . import scheme_var
+#import .scheme_var
 
 
 class EEGNet(nn.Module):

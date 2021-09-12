@@ -13,17 +13,17 @@ import io
 import sys
 
 
-from visualization import *
-from dataloader import Individual_Dataset
-import variable
-import scheme_var
-from train_test import Test, Scheme
-
-# from .visualization import *
-# from .dataloader_gui import Individual_Dataset
+# from visualization import *
+# from dataloader import Individual_Dataset
 # import variable
 # import scheme_var
-# from .train_test import Test, Scheme
+# from train_test import Test, Scheme
+
+from .visualization import *
+from .dataloader import Individual_Dataset
+from . import variable
+from . import scheme_var
+from .train_test import Test, Scheme
 
 
 #====================== Main========================
