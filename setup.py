@@ -10,7 +10,7 @@ with open(path.join(here, "README.md"),"r") as fh:
 
 setuptools.setup(
      name='ExBrainable',  
-     version='0.0.3',  
+     version='0.0.10',  
      author="Ya-Lin Huang", 
      author_email="yalinhuang.bt06@nycu.edu.tw",
      description="ExBrainable: An Open-Source GUI for CNN-based EEG Decoding and Model Interpretation",

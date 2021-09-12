@@ -9,16 +9,15 @@ dependencies:
 - numpy
 - pip
 - python>=3.7 
-- h5py
+#- h5py
 - pytorch
-- pytest
+#- pytest
 - scipy
 - tk
-- torchaudio
-- torchvision
 - pip:
   - mne 
   - torchsummary
   - sklearn
+  #- https://github.com/CECNL/ExBrainable.git
   
 
