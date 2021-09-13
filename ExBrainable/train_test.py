@@ -71,8 +71,11 @@ def kappa(net, testloader):
 
 
 #=======================main=================================
-from . import variable
-from . import scheme_var
+# from . import variable
+# from . import scheme_var
+
+import variable
+import scheme_var
 
 def Scheme():
     epochs= scheme_var.epochs
