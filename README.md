@@ -1,8 +1,8 @@
 # ExBrainable
 An Open-Source GUI for CNN-based EEG Decoding and Model Interpretation
-# Installation
+## Installation
 We provides two choices to install ExBrainable GUI : 
-## 1. Use ExBrainable on desktop  
+### 1. Use ExBrainable on desktop  
 1. Create and activate an environment for ExBrainable
 ```bash
 conda env create -f environment.yml 
@@ -12,17 +12,17 @@ conda activate ExBrainable
 ```bash
 python GUI.py
 ```
-## 2. In programming 
+### 2. In programming 
 1. Install Python >= 3.7
 2. Install Pytorch >= 1.0 from http://pytorch.org/ 
 3. Use the package manager pip to install ExBrainable
 ```bash
 pip install ExBrainable
 ```
-# Video demonstration 
+## Video demonstration 
 This is a brief video demonstration of ExBrainable : https://youtu.be/m40z2klbmtg
-# Documentation
-# Citing
+## Documentation
+## Citing
 1. ExBrainble on arxiv
 2. mne-python 
 
