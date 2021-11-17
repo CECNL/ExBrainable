@@ -153,15 +153,14 @@ def Spatial_kernel(montage, electrode):
     montage= montage.get_positions()['ch_pos']
     position= [montage[i] for i in electrode]
     position= np.asarray(position)
-    print(position)
     pos_count = len(position)
 
     fig, axes = plt.subplots(5, int(np.ceil(pos_count/5)), figsize=(5, 5))
 
     for i in range(int(5*np.ceil(pos_count/5))):
-        if i < pos_count:
-            print(conv1[:i].squeeze().shape)
-            mne.viz.plot_topomap(data=conv1[:,i].squeeze(),
+        if i < scheme_var.ch:
+            print(conv1[i:].shape)
+            mne.viz.plot_topomap(data=conv1[i:].squeeze(),
                                 pos=position[:,0:2],
                                 axes= axes[int(i/5), i%5],
                                 show=False,
