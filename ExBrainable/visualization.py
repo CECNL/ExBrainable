@@ -133,27 +133,31 @@ def channel_select(w,modelframe, stdmontagelist, Montagename):
 def select_ch(w2, modelframe, name, chlist,montage, Montagename):
     
     ch_select = chlist.curselection()
-    electrode = []
-    for c in ch_select:
-        electrode.append(chlist.get(c))
-    print(electrode)
+    if len(ch_select) != scheme_var.ch:
+        tk.messagebox.showerror('Error', f'Number of channel must be equal to {scheme_var.ch}.', parent=w2)
+    else:    
+        electrode = []
+        for c in ch_select:
+            electrode.append(chlist.get(c))
+        print(electrode)
 
-    #scheme_var.montage = montage
-    #scheme_var.electrode= electrode
-    Montagename.set(name)
-    tk.Label(modelframe, textvariable= Montagename).grid(row=11, column=1, sticky=tk.W)
-    w2.destroy()
-    Spatial_kernel(montage, electrode)
+        #scheme_var.montage = montage
+        #scheme_var.electrode= electrode
+        Montagename.set(name)
+        tk.Label(modelframe, textvariable= Montagename).grid(row=11, column=1, sticky=tk.W)
+        w2.destroy()
+        Spatial_kernel(montage, electrode)
 
 def Spatial_kernel(montage, electrode):
      
     montage= montage.get_positions()['ch_pos']
     position= [montage[i] for i in electrode]
     position= np.asarray(position)
+    print(position)
     pos_count = len(position)
 
-
     fig, axes = plt.subplots(5, int(np.ceil(pos_count/5)), figsize=(5, 5))
+
     for i in range(int(5*np.ceil(pos_count/5))):
         if i < pos_count:
             print(conv1[:i].squeeze().shape)
