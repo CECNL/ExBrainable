@@ -1,10 +1,7 @@
 # Authors: Ya-Lin Huang <yalinhuang.bt06@nycu.edu.tw>
 
-from operator import concat
 import tkinter as tk
-from tkinter.constants import Y
 from tkinter.ttk import *
-from tkinter import messagebox
 from mne import event
 from torchsummary import summary
 
@@ -14,12 +11,12 @@ import scipy.io
 import io
 import sys
 
-
 from visualization import *
 from dataloader import Individual_Dataset
+from train_test import Test, Scheme
 import variable
 import scheme_var
-from train_test import Test, Scheme
+
 
 # from .visualization import *
 # from .dataloader import Individual_Dataset
@@ -39,7 +36,7 @@ def main():
     win_main.configure(background='White')
     scheme_var.win_main= win_main
 
-    # Control Center
+    # Panel
     global trainframe, modelframe, testframe
 
     trainframe = tk.LabelFrame(win_main, text="Training Data", height=10, bg='White', width=50, labelanchor='n')
@@ -277,7 +274,7 @@ def confirm_xy_size(): #numpy array (n_trials, n_chs, n_times) (n_trials,1)
         if (X_train.shape[0]==Y_train.shape[0]): #xy train same tiral 
             if 'X_test' in globals()  :  
                 if not (X_train.shape[1]== X_test.shape[1]) and  (X_train.shape[2]== X_test.shape[2]): #xtrain xtest same channel timepoint
-                    messagebox.showerror("Error",'Shape of x_train and x_test have to be the same length.', parent=w_load ) #showerror, showinfo, showwarning 
+                    tk.messagebox.showerror("Error",'Shape of x_train and x_test have to be the same length.', parent=w_load ) #showerror, showinfo, showwarning 
                     raise ValueError ('Shape of x_train and x_test have to be the same length.')
                     
 
@@ -285,22 +282,22 @@ def confirm_xy_size(): #numpy array (n_trials, n_chs, n_times) (n_trials,1)
                 if 'Y_test' in globals(): 
                     scheme_var.situation=2
                     if not (X_test.shape[0]== Y_test.shape[0]) : # X_test, ytest trial 一樣 
-                        messagebox.showerror("Error",'Shape of x_test and y_test have to be the same length.', parent=w_load)
+                        tk.messagebox.showerror("Error",'Shape of x_test and y_test have to be the same length.', parent=w_load)
                         raise ValueError ('Shape of x_test and y_test have to be the same length.')
                         
                 else:#yes x_test , no y_test 
                     scheme_var.situation=1
             elif 'Y_test' in globals():#no x_test , yes y_test 
-                messagebox.showerror("Error",'You must also load Y_train Data.', parent=w_load)
+                tk.messagebox.showerror("Error",'You must also load Y_train Data.', parent=w_load)
             else: # no x_test, no_ytest  
                 scheme_var.situation=0    
                 
         else: 
-            messagebox.showerror("Error",'Trials of x_train and y_train have to be the same length.', parent=w_load)
+            tk.messagebox.showerror("Error",'Trials of x_train and y_train have to be the same length.', parent=w_load)
             raise ValueError ('Trials of x_train and y_train have to be the same length.')
             
     else: 
-        messagebox.showerror("Error",'You must load files of Train Data and Train Label.')
+        tk.messagebox.showerror("Error",'You must load files of Train Data and Train Label.')
         raise TypeError( 'You must load files of Train Data and Train Label.')
     
     print('situation: ', scheme_var.situation)
@@ -377,7 +374,7 @@ def load_model_struct():
     Confirm.pack()
 
 def model_select(win_lms, modelist):
-    exec(open('models.py').read(), globals()) #put all variable to globals()
+    exec(open('./ExBrainable/ExBrainable/models.py').read(), globals()) #put all variable to globals()
     name = modelist.get()
     print(name)
     scheme_var.netname= eval(str(name+'()'))
@@ -399,22 +396,10 @@ def load_files():
     xframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
     yframes = tk.LabelFrame(w_files, text="Labels", height=10, bg='White', width=50, labelanchor='n')
     yframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-    # xtrainframes = tk.LabelFrame(w_files, text="Training Data", height=10, bg='White', width=50, labelanchor='n')
-    # xtrainframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-    # ytrainframes = tk.LabelFrame(w_files, text="Training Label", height=10, bg='White', width=50, labelanchor='n')
-    # ytrainframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-    # xtestframes = tk.LabelFrame(w_files, text="Test Data", height=10, bg='White', width=50, labelanchor='n')
-    # xtestframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-    # ytestframes = tk.LabelFrame(w_files, text="Test Label", height=10, bg='White', width=50, labelanchor='n')
-    # ytestframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
 
-    #load subjects files
     ttk.Button(xframes, text='Add Files', command=(lambda:read_data_path(xframes, 'x_train')), width=10).pack()
     ttk.Button(yframes, text='Add Files', command=(lambda:read_data_path(yframes, 'y_train')), width=10).pack()
-    # ttk.Button(xtestframes, text='Add Files', command=(lambda:read_data_path(xtestframes, 'x_test')), width=10).pack()
-    # ttk.Button(ytestframes, text='Add Files', command=(lambda:read_data_path(ytestframes, 'y_test')), width=10).pack()
-    
-
+   
     Confirm = ttk.Button(w_files ,text="Confirm", command=(lambda:rename_events(w_files)), width=10).pack()
 
 def read_data_path(frame, set_type):
@@ -841,7 +826,7 @@ def update_progress_label():
     return f"Epoch: {label}/ {scheme_var.epochs}"
 
 def quit_train():
-    if messagebox.askokcancel('Quit', 'Do you want to quit?', parent=scheme_var.w_bar):
+    if tk.messagebox.askokcancel('Quit', 'Do you want to quit?', parent=scheme_var.w_bar):
         scheme_var.stop_thread= True
         scheme_var.w_bar.destroy()
 
