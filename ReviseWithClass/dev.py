@@ -1,10 +1,10 @@
 import tkinter as tk
+from tkinter.constants import ANCHOR
 import tkinter.ttk as ttk
 import numpy as np
 import scipy.io
 import mne
-#from tkinter.ttk import *
-from mne import event
+
 from tkinter import filedialog
 
 class ExBrainable():
@@ -69,14 +69,14 @@ class ExBrainable():
         wmainself=self
         filemenu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label='File ', menu=filemenu)
-        filemenu.add_command(label='Study(cross subject)', command=lambda:CrossSubject())
+        filemenu.add_command(label='Study(cross subject)', command=lambda:MultiSubjects())
         self.w_main.config(menu= menubar)
         
 
 
 
 
-class CrossSubject():
+class MultiSubjects():
     def __init__(self):
         self.w= new_window(Title='Cross subject study', size='500x450', x_pad=-10, y_pad=10)
         self.Display()
@@ -203,7 +203,7 @@ class CrossSubject():
         table.bind('<1>', self.Editname)
         table.pack(side='top', fill='x',padx=10, pady=10)
 
-        Confirm = ttk.Button(w ,text="Confirm", command=(lambda:self.DataOverview(w)), width=10).pack()
+        Confirm = ttk.Button(w ,text="Confirm", command=(lambda:DataOverview(w)), width=10).pack()
 
     def findevents(self,x):
         return {
@@ -288,79 +288,72 @@ class CrossSubject():
         entry.bind('<Return>', ok)  # validate with Enter
         entry.focus_set()
 
-    def DataOverview(self,w):
+class DataOverview():
+    def __init__(self,w):
+        self.Display(w)
+        self.ListAllEvents()
+
+    def Display(self,w):
         w.destroy()
-        w_data= new_window('Events ', '900x500', x_pad=-10, y_pad=100)
+        self.w_data= new_window('Events ', '500x380', x_pad=-10, y_pad=100)
+        self.frame_allevents= tk.LabelFrame(self.w_data,text="All Events",bg="White", labelanchor='n')
+        self.frame_validation= tk.LabelFrame(self.w_data,text="Validation",bg="White", labelanchor='n')
+        self.frame_allevents.grid(row=0, column=0,padx=10,pady=10)
+        self.frame_validation.grid(row=0, column=1)
 
-        frame_allevents= tk.LabelFrame(w_data,text="All Events",bg="White", labelanchor='n')
-        frame_train= tk.LabelFrame(w_data, text="Training set",bg="White", labelanchor='n')
-        frame_test= tk.LabelFrame(w_data, text="Testing set",bg="White", labelanchor='n')
+        #individual scheme
+        self.WithinorCross = tk.IntVar()
+        self.ValMethod= tk.IntVar()
 
-        frame_allevents.grid(row=0, column=0)
-        frame_train.grid(row=0, column=1)
-        frame_test.grid(row=0, column=2)
+        tk.Label(self.frame_validation, text='Session', bg="White").grid(row=0, column=0)
+        tk.Checkbutton(self.frame_validation, text='Train within a session',variable=self.WithinorCross, onvalue=1, offvalue=0, bg="White").grid(row=1, column=0, sticky=tk.W)
+        tk.Checkbutton(self.frame_validation, text='Train cross sessions ',variable=self.WithinorCross, onvalue=2, offvalue=0,bg="White").grid(row=2, column=0, sticky=tk.W)
+        tk.Label(self.frame_validation, text='Method', bg="White").grid(row=3, column=0)
+        tk.Checkbutton(self.frame_validation, text='5-fold',variable=self.ValMethod, onvalue=1, offvalue=0,bg="White").grid(row=4, column=0, sticky=tk.W)
+        tk.Checkbutton(self.frame_validation, text='10-fold',variable=self.ValMethod, onvalue=2, offvalue=0, bg="White").grid(row=5, column=0, sticky=tk.W)
+        tk.Checkbutton(self.frame_validation, text='LOOCV(trial) ',variable=self.ValMethod, onvalue=3, offvalue=0,bg="White").grid(row=6 ,column=0, sticky=tk.W)
+        ttk.Button(self.frame_validation ,text="Confirm", command=(lambda:SchemeValMethod(self.WithinorCross.get(), self.ValMethod.get() )), width=10).grid(row=7 ,column=0)
+
+        # adjust row space 
+        _, row_count = self.frame_validation.grid_size()
+        for row in range(row_count):
+            self.frame_validation.grid_rowconfigure(row, minsize=40) 
 
         
+
+    def ListAllEvents(self):
         # .mat 
-        tabletype=['allevents', 'train', 'test']
-        tables= {}
-        for t in tabletype:
-            tables[t]= ttk.Treeview(locals()['frame_'+ t], height=20)
-            # globals()['table_'+ t]= ttk.Treeview(locals()['frame_'+ t], height=20)
-            # globals()['table_'+ t].grid()
-            #print(len(concat_data))
-            
-            #create scroll bar
-            sb = tk.Scrollbar(locals()['frame_'+ t], orient=tk.VERTICAL)
-            sb.grid(row=0,column=1,sticky='ns')
-            tables[t].config(yscrollcommand=sb.set)
-            sb.config(command=tables[t].yview)
-            
-            #create columns
-            tables[t]['column']= ['Subject','Event ID','Event type','Onset time']
-            columns= tables[t]['column']
-
-            tables[t].column('#0', width=0, stretch=tk.NO)
-            tables[t].heading('#0', text='', anchor=tk.CENTER)
-            for col in columns:
-                tables[t].column(col, anchor=tk.CENTER, width=70 )
-                tables[t].heading(col, text='', anchor=tk.CENTER)
-
-            tables[t].grid(row=0, sticky= tk.N)
-
-            if t=='allevents':
-                i=0
-                for row in range(len(concat_data)):
-                    if row < sublen[i]:
-                        tables[t].insert(parent='', index=row, iid= row, text='', values=[subname[i], concat_data[row], eventype[concat_data[row]] , 'None'])
-                    else:
-                        i+=1
-                        sublen[i]+= sublen[i-1]    
-
-                for col in columns:
-                    tables[t].heading(col, text= col, command= lambda c=col: self.sort_id(tables[t], c, False))
-                i=0
-
-            elif t== 'train':
-                for row in range(5):
-                    tables[t].insert(parent='', index=row, iid= row, text='', values=['ha', 'he', 'he' , 'ge'])
-                for col in columns:
-                    tables[t].heading(col, text= col, command= lambda c=col: self.sort_id(tables[t], c, False))
-            
-            elif t== 'test':
-                for row in range(5):
-                    tables[t].insert(parent='', index=row, iid= row, text='', values=['ha', 'he', 'he' , 'ge'])
-                for col in columns:
-                    tables[t].heading(col, text= col, command= lambda c=col: self.sort_id(tables[t], c, False))
-        #ttk.Button(frame_allevents ,text="Move to training set", command=(Moveto(tables))).grid(row=1, column=0)
-        #ttk.Button(frame_allevents ,text="Move to test set", command=(Moveto(tables))).grid(row=1, column=1)
+        table= ttk.Treeview(self.frame_allevents, height=15)
         
-
-    def Moveto(tables):
-        data= tk.Variable()
-        print([table['allevents'].item(idx) for idx in tables['allevents'].selection()])
-        #data.set([table['allevents'].item(idx) for idx in tables['allevents'].selection()])
+        #create scroll bar
+        sb = tk.Scrollbar(self.frame_allevents, orient=tk.VERTICAL)
+        sb.grid(row=0,column=1,sticky='ns')
+        table.config(yscrollcommand=sb.set)
+        sb.config(command=table.yview)
         
+        #create columns
+        table['column']= ['Subject','Event ID','Event type','Onset time']
+        columns= table['column']
+
+        table.column('#0', width=0, stretch=tk.NO)
+        table.heading('#0', text='', anchor=tk.CENTER)
+        for col in columns:
+            table.column(col, anchor=tk.CENTER, width=70 )
+            table.heading(col, text='', anchor=tk.CENTER)
+
+        table.grid(row=0, sticky= tk.N)
+
+        i=0
+        for row in range(len(concat_data)):
+            if row < sublen[i]:
+                table.insert(parent='', index=row, iid= row, text='', values=[subname[i], concat_data[row], eventype[concat_data[row]] , 'None'])
+            else:
+                i+=1
+                sublen[i]+= sublen[i-1]    
+
+        for col in columns:
+            table.heading(col, text= col, command= lambda c=col: self.sort_id(table, c, False))
+        i=0
 
 
     def sort_id(table, col, reverse):
@@ -372,6 +365,38 @@ class CrossSubject():
         for index, (val, k) in enumerate(l): # save sorted changes to table 
             table.move(item= k, parent= '', index= index) # move k to index position
             table.heading(col,command=lambda: self.sort_id(table, col, False))
+
+              
+
+class SchemeValMethod():
+    def __init__(self,userscheme,usermethod):
+        self.Scheme= {1: 'Within', 2: 'Cross'}
+        self.Method= {1 : '5fold', 2: '10fold', 3: 'LOOCV'}
+        self.userscheme= userscheme
+        self.usermethod= usermethod
+        print(f'{self.userscheme} {self.usermethod} session')
+
+    def GetMethod(self):
+        # .get(key, default)
+        self.Scheme.get(self.userscheme, 'Within')()
+        self.Method.get(self.usermethod, '5fold')()
+    # def Within():
+
+    # def Cross(): 
+    
+    # def kfold():
+
+    # def loocv():
+
+
+
+
+
+        
+
+
+
+
 
 
 
