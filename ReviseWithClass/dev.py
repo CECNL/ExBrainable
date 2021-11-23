@@ -29,18 +29,12 @@ class ExBrainable():
 
         modelframe = tk.LabelFrame(self.w_main, text="Model and Training Setting", height=10, bg='White', width=50, labelanchor='n')
         modelframe.pack(fill='both', ipadx=1 ,ipady= 10,padx= 20,pady= 0)
-        tk.Label(modelframe, text="Model :　", bg= 'White').grid(row=0, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Sampliing Rate :　", bg= 'White').grid(row=1, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Validation Split :　", bg= 'White').grid(row=2, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Batch Size :　", bg= 'White').grid(row=3, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Epoch :　", bg= 'White').grid(row=4, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Learning Rate :　", bg= 'White').grid(row=5, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Save Model Weight:　", bg= 'White').grid(row=6, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Pretrained Model Weight:　", bg= 'White').grid(row=7, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Training Time (sec) :　", bg= 'White').grid(row=8, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Trainable Parameters :　", bg= 'White').grid(row=9, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="Memory Size (MB) :　", bg= 'White').grid(row=10, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(modelframe, text="EEG Montage :　", bg= 'White').grid(row=11, column=0, ipady=4, padx=20, sticky=tk.W)
+
+        text= ['Model', 'Sampliing Rate', 'Validation Split', 'Batch Size', 'Epoch',\
+               'Learning Rate', 'Save Model Weight','Pretrained Model Weight',\
+               'Training Time (sec)' ,'Trainable Parameters','Memory Size (MB)','EEG Montage'  ]
+        for row, rowtext in enumerate(text):
+            tk.Label(modelframe, text=f"{rowtext} :　", bg= 'White').grid(row=row, column=0, ipady=4, padx=20, sticky=tk.W)
         
         #default pretrained weight and path of saving weight as None
         global shortweightfolder, shortloadweightfile
@@ -50,6 +44,7 @@ class ExBrainable():
         shortweightfolder.set('None')
         shortloadweightfile.set('None')
         Montagename.set('None')
+        
         tk.Label(modelframe, textvariable= shortweightfolder, bg= 'White').grid(row=6, column=1,sticky=tk.W)
         tk.Label(modelframe, textvariable= shortloadweightfile, bg= 'White').grid(row=7, column=1,sticky=tk.W)
         tk.Label(modelframe, textvariable= Montagename, bg= 'White').grid(row=11, column=1,sticky=tk.W)
