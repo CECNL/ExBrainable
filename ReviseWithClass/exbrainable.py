@@ -15,10 +15,16 @@ class ExBrainable():
         self.trainframe = tk.LabelFrame(self.win_main, text="Training Data", height=10, bg='White', width=50, labelanchor='n')
         self.modelframe = tk.LabelFrame(self.win_main, text="Model and Training Setting", height=10, bg='White', width=50, labelanchor='n')
         self.testframe = tk.LabelFrame(self.win_main, text="Test Data", height=10, bg='White', width=50, labelanchor='n')
-
+        
+      
 
     def execution(self):
-        data = database.Database()
+        self.database = database.Database()
+        
+        #store winmain to database
+        self.win_main.update()
+        self.database.set_var.win_main_x= self.win_main.winfo_rootx()
+        self.database.set_var.win_main_y= self.win_main.winfo_rooty()
 
         # Construct the ExBrainable Panel
         self.construct_framework()
@@ -26,26 +32,29 @@ class ExBrainable():
         # Construct Load File Menu
         filemenu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label = 'File ', menu = filemenu)
-        load_file_menu = menu.Load_File_Menu(filemenu)
+        load_file_menu = menu.Load_File_Menu(filemenu, self.database)
 
         # Construct Load Model Menu
         modelmenu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label = 'Model', menu = modelmenu)
-        load_model_menu = menu.Load_Model_Menu(modelmenu)
+        load_model_menu = menu.Load_Model_Menu(modelmenu, self.database, self.modelframe, filemenu)
 
         # Construct Training Menu
         trainmenu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label = 'Training', menu = trainmenu)
-        training_menu = menu.Training_Menu(trainmenu)
+        training_menu = menu.Training_Menu(trainmenu, self.database)
 
         # Construct Result Menu
         resultmenu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label = 'Results', menu = resultmenu)
-        result_menu = menu.Result_Menu(resultmenu)
+        result_menu = menu.Result_Menu(resultmenu, self.database)
 
         # Create the ExBrainable Panel
         self.win_main.config(menu = self.menubar)
         self.win_main.mainloop()
+
+       
+        
 
 
     def construct_framework(self):

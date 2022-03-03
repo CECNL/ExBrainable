@@ -5,16 +5,18 @@ import panel
 
 
 class Load_File_Menu():
-    def __init__(self, filemenu):
+    def __init__(self, filemenu, database):
         self.filemenu = filemenu
+        self.database= database
         self.filemenu.add_command(label='Load Data', command=self.create_load_data_panel)
         self.filemenu.add_command(label='Load Model Weight', command=self.create_load_weight_panel)
         self.filemenu.add_command(label='Study(Cross Subject)')
 
 
     def create_load_data_panel(self):
-        load_data_panel = panel.Load_Data_Panel()
-
+        load_data_panel = panel.Load_Data_Panel(self.database)
+        
+        
 
     def create_load_weight_panel(self):
         load_weight_panel = panel.Load_Weight_Panel()
@@ -22,19 +24,20 @@ class Load_File_Menu():
 
 
 class Load_Model_Menu():
-    def __init__(self, modelmenu):
+    def __init__(self, modelmenu, database, modelframe, filemenu):
+        self.database= database
         self.modelmenu = modelmenu
-        self.modelmenu.add_command(label='Model Selection', command=self.create_load_struct_panel)
+        self.modelmenu.add_command(label='Model Selection', command=lambda:panel.Load_Structure_Panel(self.database, modelframe, filemenu, self.modelmenu))
         self.modelmenu.add_command(label='Training Setting', command=self.create_model_setting_panel)
-        self.modelmenu.add_command(label='Model Summary', command=self.create_summary_panel)
+        #self.modelmenu.add_command(label='Model Summary', command=self.create_summary_panel)
 
     
-    def create_summary_panel():
-        model_summary_panel = panel.Model_Summary_Panel()
+    #def create_summary_panel(self.database):
+       # model_summary_panel = panel.Model_Summary_Panel()
 
     
-    def create_load_struct_panel():
-        load_struct_panel = panel.Load_Structure_Panel()
+    #def create_load_struct_panel():
+    #load_struct_panel = panel.Load_Structure_Panel(self.database)
 
     
     def create_model_setting_panel():
@@ -44,7 +47,7 @@ class Load_Model_Menu():
 
 
 class Training_Menu():
-    def __init__(self, trainmenu):
+    def __init__(self, trainmenu, database):
         self.trainmenu = trainmenu
         self.trainmenu.add_command(label='Model Training', command=self.create_training_panel)
     
@@ -55,7 +58,7 @@ class Training_Menu():
 
 
 class Result_Menu():
-    def __init__(self, resultmenu):
+    def __init__(self, resultmenu, database):
         self.resultmenu = resultmenu
         self.visualmenu = tk.Menu(self.resultmenu, tearoff=0)
         self.resultmenu.add_command(label='Model Prediction', command=self.create_predicted_panel)
@@ -67,7 +70,7 @@ class Result_Menu():
 
     def create_predicted_panel():
         predicted_panel = panel.Predicted_Panel()
-
+        
 
     def create_performance_panel():
         performance_panel = panel.Performance_Panel()

@@ -140,18 +140,21 @@ class MultiSubjects():
                     raise ValueError (f'Dict key must be {set_type}.')
                 data= data_[set_type]
                 ftype= '.mat'
+                return data   
 
             if '.set' in path: 
-                data = mne.io.read_epochs_eeglab(path, uint16_codec='latin1')
-                #data =data._data
+                raw = mne.io.read_epochs_eeglab(path, uint16_codec='latin1')
+                #data = raw._data
                 ftype='.set'
+
+                return raw  
 
             if '.edf' in path: 
                 data= mne.io.read_raw_edf(path,preload= True)
                 data =data._data
                 ftype='.edf'
-
-            return data     
+                return data
+              
 
         except TypeError:
             print('The file format is not supported.')
@@ -198,7 +201,7 @@ class MultiSubjects():
         table.bind('<1>', self.Editname)
         table.pack(side='top', fill='x',padx=10, pady=10)
 
-        Confirm = ttk.Button(w ,text="Confirm", command=(lambda:DataOverview(w)), width=10).pack()
+        Confirm = ttk.Button(w ,text="Confirm", command=(lambda:SplitData(w)), width=10).pack()
 
     def findevents(self,x):
         return {
@@ -283,120 +286,150 @@ class MultiSubjects():
         entry.bind('<Return>', ok)  # validate with Enter
         entry.focus_set()
 
-class DataOverview():
+
+class SplitData():
     def __init__(self,w):
-        self.DisplayCross(w)
-        self.Tables()
-        SplitDataset(self.nevents, self.frame)
+        self.Display(w)
+        #SplitDataset(self.nevents, self.frame)
         
 
-    def DisplayCross(self,w):
+    def Display(self,w):
         
         w.destroy()
-        self.w_data= new_window('Events ', '900x500', x_pad=-10, y_pad=100)
+        w_split= new_window('Split Data ', '500x500', x_pad=-10, y_pad=100)
+        tk.Label( w_split , text='Cross validation', bg= 'White').grid(row=0,column=0, padx=10,ipady=4, sticky=tk.W)
+        tk.Label( w_split , text='Split Trials by', bg= 'White').grid(row=1,column=0, padx=10,ipady=4, sticky=tk.W)
+        tk.Label( w_split , text='Train:Validation:Test', bg= 'White').grid(row=2,column=0, padx=10,ipady=4, sticky=tk.W)
+        tk.Label( w_split , text='Select Classes', bg= 'White').grid(row=3,column=0, padx=10,ipady=4, sticky=tk.W)
+        tk.Label( w_split , text='Select Onset time', bg= 'White').grid(row=4,column=0, padx=10,ipady=4, sticky=tk.W)
         
-        
-        
-        self.frame={}
-        self.nevents= {}
-        global tabletype
-        tabletype=['All events', 'Training set', 'Testing set']
-        t_col=0
 
-        for t in tabletype:
-            self.frame[t]= tk.LabelFrame(self.w_data,text= t,bg="White", labelanchor='n')
-            self.frame[t].grid(row=0, column=t_col)
-            self.nevents[t]= tk.StringVar()
-            self.nevents[t].set('0')
-            tk.Label(self.frame[t], text= f'total: {self.nevents[t].get()}', bg= 'White').grid(row=1,padx=10,ipady=4, sticky=tk.W)
-            t_col+=1
-  
-    def Tables(self):
-        # .mat 
-        global tables
+        SplitRatio = tk.Entry(w_split)
+        ClassSelection = tk.Entry(w_split)
+        OnsetTSelection = tk.Entry(w_split)
+        
+        SplitRatio.grid(row=2, column=1)
+        ClassSelection .grid(row=3, column=1)
+        OnsetTSelection.grid(row=4, column=1)
+        
     
-        tables= {}
-        for t in tabletype:
-            tables[t]= ttk.Treeview(self.frame[t], height=20)
+
+# class DataOverview():
+#     def __init__(self,w):
+#         self.DisplayCross(w)
+#         self.Tables()
+#         SplitDataset(self.nevents, self.frame)
         
-            #create scroll bar
-            sb = tk.Scrollbar(self.frame[t], orient=tk.VERTICAL)
-            sb.grid(row=0,column=1,sticky='ns')
-            tables[t].config(yscrollcommand=sb.set)
-            sb.config(command=tables[t].yview)
+
+#     def DisplayCross(self,w):
+        
+#         w.destroy()
+#         self.w_data= new_window('Events ', '900x500', x_pad=-10, y_pad=100)
+        
+        
+        
+#         self.frame={}
+#         self.nevents= {}
+#         global tabletype
+#         tabletype=['All events', 'Training set', 'Testing set']
+#         t_col=0
+
+#         for t in tabletype:
+#             self.frame[t]= tk.LabelFrame(self.w_data,text= t,bg="White", labelanchor='n')
+#             self.frame[t].grid(row=0, column=t_col)
+#             self.nevents[t]= tk.StringVar()
+#             self.nevents[t].set('0')
+#             tk.Label(self.frame[t], text= f'total: {self.nevents[t].get()}', bg= 'White').grid(row=1,padx=10,ipady=4, sticky=tk.W)
+#             t_col+=1
+  
+#     def Tables(self):
+#         # .mat 
+#         global tables
+    
+#         tables= {}
+#         for t in tabletype:
+#             tables[t]= ttk.Treeview(self.frame[t], height=20)
+        
+#             #create scroll bar
+#             sb = tk.Scrollbar(self.frame[t], orient=tk.VERTICAL)
+#             sb.grid(row=0,column=1,sticky='ns')
+#             tables[t].config(yscrollcommand=sb.set)
+#             sb.config(command=tables[t].yview)
             
-            #create columns
-            tables[t]['column']= ['Subject','Event ID','Event type','Onset time']
-            global columns
-            columns= tables[t]['column']
+#             #create columns
+#             tables[t]['column']= ['Subject','Event ID','Event type','Onset time']
+#             global columns
+#             columns= tables[t]['column']
 
-            tables[t].column('#0', width=0, stretch=tk.NO)
-            tables[t].heading('#0', text='', anchor=tk.CENTER)
-            for col in columns:
-                tables[t].column(col, anchor=tk.CENTER, width=70 )
-                tables[t].heading(col, text=col, anchor=tk.CENTER)
+#             tables[t].column('#0', width=0, stretch=tk.NO)
+#             tables[t].heading('#0', text='', anchor=tk.CENTER)
+#             for col in columns:
+#                 tables[t].column(col, anchor=tk.CENTER, width=70 )
+#                 tables[t].heading(col, text=col, anchor=tk.CENTER)
 
-            tables[t].grid(row=0, sticky= tk.N)
+#             tables[t].grid(row=0, sticky= tk.N)
 
-            if t=='All events':
-                i=0
-                for row in range(len(concat_data)):
-                    if row < sublen[i]:
-                        tables[t].insert(parent='', index=row, iid= row, text='', values=[subname[i], concat_data[row], eventype[concat_data[row]] , 'None'])
-                    else:
-                        i+=1
-                        sublen[i]+= sublen[i-1]    
+#             if t=='All events':
+#                 i=0
+#                 for row in range(len(concat_data)):
+#                     if row < sublen[i]:
+#                         tables[t].insert(parent='', index=row, iid= row, text='', values=[subname[i], concat_data[row], eventype[concat_data[row]] , 'None'])
+#                     else:
+#                         i+=1
+#                         sublen[i]+= sublen[i-1]    
 
-                for col in columns:
-                    tables[t].heading(col, text= col, command= lambda c=col: self.sort_id(tables[t], c, False))
-                i=0
+#                 for col in columns:
+#                     tables[t].heading(col, text= col, command= lambda c=col: self.sort_id(tables[t], c, False))
+#                 i=0
         
-    def sort_id(table, col, reverse):
-        l = [(table.set(k, col), k) for k in table.get_children('')]
-        #print(l) #[(eventid,rowindex), ... ]
-        l.sort(key=lambda t: int(t[0]), reverse=reverse)
-        #print(l) #sort by eventid 
+#     def sort_id(table, col, reverse):
+#         l = [(table.set(k, col), k) for k in table.get_children('')]
+#         #print(l) #[(eventid,rowindex), ... ]
+#         l.sort(key=lambda t: int(t[0]), reverse=reverse)
+#         #print(l) #sort by eventid 
 
-        for index, (val, k) in enumerate(l): # save sorted changes to table 
-            table.move(item= k, parent= '', index= index) # move k to index position
-            table.heading(col,command=lambda: self.sort_id(table, col, False))
+#         for index, (val, k) in enumerate(l): # save sorted changes to table 
+#             table.move(item= k, parent= '', index= index) # move k to index position
+#             table.heading(col,command=lambda: self.sort_id(table, col, False))
 
-class SplitDataset():
 
-    def __init__(self, nevents, frames):
-        self.nevents= nevents
-        self.frames= frames
-        self.popup_menu = tk.Menu(tables['All events'], tearoff=0)
-        self.popup_menu.add_command(label="Move to Training set",command=lambda:self.Moveto('Training set'))
-        self.popup_menu.add_command(label="Move to Test set",command=lambda:self.Moveto('Testing set'))
 
-        tables['All events'].bind("<Button-3>", self.popup) 
+# class SplitDataset():
 
-    def popup(self, event):
-        try:
-            self.popup_menu.tk_popup(event.x_root+50, event.y_root+30, 0)
-        finally:
-            self.popup_menu.grab_release()
+#     def __init__(self, nevents, frames):
+#         self.nevents= nevents
+#         self.frames= frames
+#         self.popup_menu = tk.Menu(tables['All events'], tearoff=0)
+#         self.popup_menu.add_command(label="Move to Training set",command=lambda:self.Moveto('Training set'))
+#         self.popup_menu.add_command(label="Move to Test set",command=lambda:self.Moveto('Testing set'))
 
-    def Moveto(self, towhere):
+#         tables['All events'].bind("<Button-3>", self.popup) 
 
-       for row in tables['All events'].selection():
-            event= tables['All events'].item(row)['values'] #get selected rows
-            tables[towhere].insert('',index='end',values=event) # move 
-            tables['All events'].delete(row)
+#     def popup(self, event):
+#         try:
+#             self.popup_menu.tk_popup(event.x_root+50, event.y_root+30, 0)
+#         finally:
+#             self.popup_menu.grab_release()
 
-       for col in columns:
-                    tables[towhere].heading(col, text= col, command= lambda c=col: self.sort_id(tables[towhere], c, False))
+#     def Moveto(self, towhere):
+
+#        for row in tables['All events'].selection():
+#             event= tables['All events'].item(row)['values'] #get selected rows
+#             tables[towhere].insert('',index='end',values=event) # move 
+#             tables['All events'].delete(row)
+
+#        for col in columns:
+#                     tables[towhere].heading(col, text= col, command= lambda c=col: self.sort_id(tables[towhere], c, False))
 
        
-       len_allevents= len(tables['All events'].get_children())
-       len_selected= len(tables['All events'].selection())
-       len_towhere= len(tables[towhere].get_children())
-       len_allevents -= len_selected
-       len_towhere += len_selected
-       self.nevents['All events'].set(str(len_allevents))
-       self.nevents[towhere].set(str(len_towhere))
-       tk.Label(self.frames[towhere], text= f'total: {self.nevents[towhere].get()}', bg= 'White').grid(row=1,padx=10,ipady=4, sticky=tk.W)
+#        len_allevents= len(tables['All events'].get_children())
+#        len_selected= len(tables['All events'].selection())
+#        len_towhere= len(tables[towhere].get_children())
+#        len_allevents -= len_selected
+#        len_towhere += len_selected
+#        self.nevents['All events'].set(str(len_allevents))
+#        self.nevents[towhere].set(str(len_towhere))
+#        tk.Label(self.frames[towhere], text= f'total: {self.nevents[towhere].get()}', bg= 'White').grid(row=1,padx=10,ipady=4, sticky=tk.W)
        
 
 
