@@ -2,7 +2,11 @@ import tkinter as tk
 
 
 
-def new_window(Title, size, x, y, x_pad, y_pad):
+def new_window(Title, size,x_pad, y_pad, database):
+    
+    x= database.set_var.win_main_x
+    y= database.set_var.win_main_y
+    
     win_main_x = x + x_pad
     win_main_y = y + y_pad
 
