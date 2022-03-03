@@ -6,285 +6,273 @@ import numpy as np
 import scipy.io
 import mne
 from tkinter import filedialog
-
-class ExBrainable():
-    def __init__(self):
-        self.w_main= tk.Tk()
-        self.w_main.geometry('500x750')
-        self.w_main.title("ExBrainable")
-        self.w_main.configure(background='White')
-        self.MainDashBoard()
-        self.Menu()
-        ###database 
-        self.Database={}
-
-    def MainDashBoard(self):
-        global trainframe, modelframe, testframe
-
-        trainframe = tk.LabelFrame(self.w_main, text="Training Data", height=10, bg='White', width=50, labelanchor='n')
-        trainframe.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-        tk.Label(trainframe, text="Train Data (X_train) :　", bg= 'White').grid(row=0, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(trainframe, text="Train Data size :　", bg= 'White').grid(row=1, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(trainframe, text="Train Label (Y_train) :  ", bg= 'White').grid(row=2, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(trainframe, text="Train Label size :　", bg= 'White').grid(row=3, column=0, ipady=4, padx=20, sticky=tk.W)
-        
-
-        modelframe = tk.LabelFrame(self.w_main, text="Model and Training Setting", height=10, bg='White', width=50, labelanchor='n')
-        modelframe.pack(fill='both', ipadx=1 ,ipady= 10,padx= 20,pady= 0)
-
-        text= ['Model', 'Sampliing Rate', 'Validation Split', 'Batch Size', 'Epoch',\
-               'Learning Rate', 'Save Model Weight','Pretrained Model Weight',\
-               'Training Time (sec)' ,'Trainable Parameters','Memory Size (MB)','EEG Montage'  ]
-        for row, rowtext in enumerate(text):
-            tk.Label(modelframe, text=f"{rowtext} :　", bg= 'White').grid(row=row, column=0, ipady=4, padx=20, sticky=tk.W)
-        
-        #default pretrained weight and path of saving weight as None
-        global shortweightfolder, shortloadweightfile
-        shortweightfolder= tk.StringVar()
-        shortloadweightfile= tk.StringVar()
-        Montagename= tk.StringVar()
-        shortweightfolder.set('None')
-        shortloadweightfile.set('None')
-        Montagename.set('None')
-        
-        tk.Label(modelframe, textvariable= shortweightfolder, bg= 'White').grid(row=6, column=1,sticky=tk.W)
-        tk.Label(modelframe, textvariable= shortloadweightfile, bg= 'White').grid(row=7, column=1,sticky=tk.W)
-        tk.Label(modelframe, textvariable= Montagename, bg= 'White').grid(row=11, column=1,sticky=tk.W)
-
-        testframe = tk.LabelFrame(self.w_main, text="Test Data", height=10, bg='White', width=50, labelanchor='n')
-        testframe.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-        tk.Label(testframe, text="Test Data(X_test) :　", bg= 'White').grid(row=0, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(testframe, text="Test Data Size :　", bg= 'White').grid(row=1 ,column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(testframe, text="Test Label(Y_test) :  ", bg= 'White').grid(row=2, column=0, ipady=4, padx=20, sticky=tk.W)
-        tk.Label(testframe, text="Test Label Size :　", bg= 'White').grid(row=3, column=0, ipady=4, padx=20, sticky=tk.W)
-
-    def Menu(self):
-        menubar = tk.Menu(self.w_main)
-        global filemenu, Results, Model, wmainself
-
-        # Menu- File
-        wmainself=self
-        filemenu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label='File ', menu=filemenu)
-        filemenu.add_command(label='Study(cross subject)', command=lambda:LoadFileMenu(self.Database))
-        self.w_main.config(menu= menubar)
-        
+import pandas as pd
 
 
+class LoadData:
+    def __init__(self,database):
+        self.data= database.data
+        self.data.Data= {}
+        self.data.Label={}
 
+    def ReadData(self, frame):
+        fileList = filedialog.askopenfilenames()
 
+        for index, path in enumerate(fileList):
+            fname= path.split('/')[-1]
+            tk.Label(frame, text= fname, bg='White').pack(fill='both',padx=20)
 
-class LoadFileMenu():
-    def __init__(self, Database):
-        LoadDataPanel(Panel, Database)
+            self.data.Data[fname]= self.ReadFiles(path)
+            print(self.data.Data[fname].event_id)
+            sub, session =self.splitsubsession(fname)
+            df= self.MakeInfo(self.data.Data[fname], sub, session)
 
+            if 'Info' not in locals(): #revised 
+                Info= df
+            else:
+                temp= df
+                Info= pd.concat([Info, temp])
 
-class LoadDataPanel():
-    def __init__(self,Panel, Database):
-        
-        self.w= Panel(Title='Load Data Files', size='500x450', x_pad=-10, y_pad=10)
-        self.xframes = tk.LabelFrame(self.w, text="Data", height=10, bg='White', width=50, labelanchor='n')
-        self.yframes = tk.LabelFrame(self.w, text="Labels", height=10, bg='White', width=50, labelanchor='n')
-        self.xframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-        self.yframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-        
-        ttk.Button(self.xframes, text='Add Files', command=(lambda : self.AllFiles('x',  Database)), width=10).pack()
-        ttk.Button(self.yframes, text='Add Files', command=(lambda : self.AllFiles('y',  Database)), width=10).pack()
-        ttk.Button(self.w ,text="Confirm", command=(lambda:self.RenameEvents(self.w, Database)), width=10).pack()
+            self.data.DataInfo= Info # each file has a raw in Data , all file events in info
+            print(self.data.DataInfo)
 
-        
-    def AllFiles(self, xory,  Database):
-
-        if xory == 'x':
-            frame= self.xframes
-        if xory == 'y':
-            frame= self.yframes
-            
-
+    
+    def ReadLabels(self, frame):
         files = filedialog.askopenfilenames()
-        Path, Data, Eventids ={},{},{}
-        
-        for index, path in enumerate(files):
-            Path[f'path_{index}']= path
-            Data[f'data_{index}'], Eventids[f'eventid_{index}']= self.ReadFiles(path)
-            #skip concat data 
-            tk.Label(frame, text= path.split('/')[-1], bg='White').pack(fill='both',padx=20)
+        print('Read Labels')
 
-        Database[f'{xory}data']= Data
-        Database[f'{xory}path']= Path
-        Database[f'eventids']= Eventids
-        
+    def splitsubsession(self,fname):  
+        sfname= fname.split('_') # revise: cross subject
+        sub = [int(i) for i in sfname[0] if i.isdigit()]
+        sub = [j for j in sub if j>0]
+        session = [int(s) for s in sfname[1] if s.isdigit()]
+
+        return sub[0], session[0]
 
     def ReadFiles(self,path):
+
+        '''read files based on filetype'''
         try:    
             if '.set' in path: 
                 data = mne.io.read_epochs_eeglab(path, uint16_codec='latin1')  
-                print(data.event_id)
+                
 
             if '.edf' in path: 
                 data= mne.io.read_raw_edf(path,preload= True) 
-            
-            return data, data.event_id
+
+            # .txt revise
+
+            return data
 
         except TypeError:
             print('The file format is not supported.')
 
-    
+    def MakeInfo(self,raw, sub,session): # sub,session : int
+        onset= np.diff(raw.events[:,0])
+        # insert length of last trial, make sure order is (trial, ch, tp)
+        onset= np.insert(onset, len(raw.events)-1 , raw._data[-1,-1,:].shape , axis=0) 
+        data={ 'Subject': [sub]* len(raw.events),
+            'Session': [session]* len(raw.events), 
+            'Class': raw.events[:,2],
+            'Onset time':  onset}
+        df= pd.DataFrame(data)
+
+        return df
         
 
-    def RenameEvents(self,wdata, Database):
-        wdata.destroy()
-        w= Panel('Rename Events', '500x250', x_pad=-10, y_pad=180)
+'''
+class DataSplit
+- Info (should move to load data)
+  DataInfo(): stack info of each file
+  MakeInfo(): sub/session/onset/class of event -> pd.dataframe
+- Sort(): split data based on choices of 1. None 2. Split from train 3. choose a file
+    Sortbycriteria(): convert filename into sub/session intlist  2. filtering onset/class/session
+- Split(): kfold, train/val ,train/test split
+    SplitData(): sklearn normal and stratified kfold
+'''
+from sklearn.model_selection import KFold, StratifiedKFold
 
-        print('len of eventtype', len(self.uniquevent.keys()))
-        self.uniquevents(Database)
+class DataSortandSplit:
+    def __init__(self,data):
+        self.data= data
 
+        # self.data.ExcludedClass  = ['1','2'] # mne event num 1~n, eventdict revise
+        # self.data.ExcludedClass = [int(i) for i in self.data.ExcludedClass] #revised ok
+        # self.data.SelectedOnset = '-100~3000'
+        # self.data.TrainFile = ['S03_1.set']
+        # #self.data.ValFile = ['S03_1.set'] 
+        # #self.data.ValFile = None
+        # self.data.TestFile = ['S03_2.set']
+        # #self.data.TestFile = None
+        # self.data.TrainValratio = None
+        # self.data.TrainTestratio = None
+        # self.data.kfold= 4
 
-        table= ttk.Treeview(w, height=len(self.uniquevent.keys()))
-        sb = tk.Scrollbar(w, orient=tk.VERTICAL)
-        sb.pack(side=tk.RIGHT, fill=tk.Y)
-        table.config(yscrollcommand=sb.set)
-        sb.config(command=table.yview)
+        #print(f'kfold: {self.data.kfold}')
+        #print(f'excluded class: {self.data.ExcludedClass}')
+        #print(f'TrainValratio: {self.data.TrainValratio}')
+        #print(f'TrainTestratio: {self.data.TrainTestratio}')
+        
+        self.data.Info= self.data.DataInfo
+        self.main()
+    
+    def main(self):
 
-        table['column']= ['Event ID','Event type']
-        table.column('#0', width=0, stretch=tk.NO)
-        table.column('Event ID', anchor=tk.CENTER, width=30 )
-        table.column('Event type', anchor=tk.CENTER, width=130)
-        table.heading('#0', text='', anchor=tk.CENTER)
-        table.heading('Event ID', text='Event ID', anchor=tk.CENTER)
-        table.heading('Event type', text='Event type', anchor=tk.CENTER)
-
-        if '.set' in Database['xpath']['path_0']: 
+        if self.data.kfold == None:
+            print('no kfold')
+            self.Train()
+            self.Test()
+            self.Validation()
+        else: 
+            print('kfold split')
             
-            #for row in range(len(uniquevent.keys())):
-            for row,(type, id) in enumerate(self.uniquevent.items()):
-                #eventypes=list(event_ids.keys())
-                print(row, type, id)
-                item= table.insert(parent='', index=row, iid= row, text='', values=[id, type])
-                table.item(item, tags=item)
-        # # if ftype== '.mat':
-        # #     global eventype
-        # #     eventype= [None]*len(event_ids) # eventype is none default in mat file 
-        # #     for row in range(len(event_ids)):
-        # #         item= table.insert(parent='', index=row, iid= row, text='', values=[event_ids[row], eventype[row] ])
-        # #         table.item(item, tags=item)
+            self.Train()
+            self.Test()
 
-        # table.bind('<1>', self.Editname, table)
-        # table.pack(side='top', fill='x',padx=10, pady=10)
+            '''kfold'''
+            ratio= self.data.kfold
+            iterate = True
+            self.data.kfoldTrainValidx=self.SplitData(self.data.TrainData._data, self.data.TrainLabel,ratio= ratio, kfold='Stratified', iterate= iterate)
+            print(self.data.TrainData.events)
+            print('fold 1 train',self.data.TrainLabel[self.data.kfoldTrainValidx[0]])
+            print('fold 1 test',self.data.TrainLabel[self.data.kfoldTrainValidx[1]])
+            print('fold 2 train',self.data.TrainLabel[self.data.kfoldTrainValidx[2]])
+            print('fold 2 test',self.data.TrainLabel[self.data.kfoldTrainValidx[3]])
+            print('fold 3 train',self.data.TrainLabel[self.data.kfoldTrainValidx[4]])
+            print('fold 3 test',self.data.TrainLabel[self.data.kfoldTrainValidx[5]])
+            print('fold 4 train',self.data.TrainLabel[self.data.kfoldTrainValidx[6]])
+            print('fold 4 test',self.data.TrainLabel[self.data.kfoldTrainValidx[7]])
 
-        #Confirm = ttk.Button(w ,text="Confirm", command=(lambda:SplitData(w)), width=10).pack()
-    def uniquevents(self, Database):        
-        self.uniquevent={}
-        EventFiles= Database['eventids']
-        #for index in range(len())
-        for fileevent in EventFiles.keys(): #fir each file 
-            for eventype in EventFiles[fileevent].keys(): #each event 
-                if eventype not in self.uniquevent:
-                    self.uniquevent[eventype]= EventFiles[fileevent][eventype] # {'eventype', 'id'}  
-    # # def findevents(self,x):
-    # #     return {
-    # #         #'.set': data.event_id,
-    # #         '.mat': event_ids,
-    # #     }[x]
+       
+    def Train(self):
+        '''Train'''
+        print(self.data.TrainFile)
+        self.data.TrainData, self.data.TrainLabel, self.Trainsub, self.Trainsess= self.Sortbycriteria(self.data.TrainFile) # onset, class
+        
+        print('Trainsub/sess: ',self.Trainsub, self.Trainsess)
+        print('Train seleted data: ',self.data.TrainData)   
+        print('shape',self.data.TrainData._data.shape)
+        print('label shape', self.data.TrainLabel.shape)
 
-    # def Editname(self,event, table):
-
-    #     if table.identify_region(event.x, event.y) == 'cell':
-    #         # the user clicked on a cell
-
-    #         def ok(event):
-    #             """Change item value."""
-    #             #print(entry.get(), type(entry.get()))
-    #             if column=='#1':
-    #                 event_ids[int(item)]= int(entry.get())
-    #             if column=='#2':
-    #                 eventype[int(item)]= entry.get()
-    #             print(event_ids, eventype)
-
-    #             table.set(item, column, entry.get())
-    #             entry.destroy()
+    def Test(self):
+        '''Test'''
+        # split from train
+        if self.data.TrainTestratio != None: 
+            print('split from train')
+            self.Testsub = self.Trainsub
+            self.Testsess= self.Trainsess
+            self.data.TrainData, self.data.TestData, self.data.TrainLabel, self.data.TestLabel=self.SplitfromTrain(self.data.TrainTestratio)
             
-    #         column = table.identify_column(event.x)  # identify column
-    #         item = table.identify_row(event.y)  # identify item
-    #         x, y, width, height = table.bbox(item, column) 
-    #         value = table.set(item, column)
+            print('Test seleted data: ',self.data.TestData)   
+            print('shape',self.data.TestData._data.shape)
+            print('label shape', self.data.TestLabel.shape)
+         # choose test file
+         
+        elif self.data.TestFile != None: 
+            print('choose test file')    
+            self.data.TestData, self.data.TestLabel, self.Testsub, self.Testsess =self.Sortbycriteria(self.data.TestFile)
 
         
             
+            print('Test seleted data: ',self.data.TestData)   
+            print('shape',self.data.TestData._data.shape)
+            print('label shape', self.data.TestLabel.shape)
 
-    #     elif table.identify_region(event.x, event.y) == 'heading': 
-    #         # the user clicked on a heading
+        else: 
+            print('No test data and labels')
+        
+    def Validation(self):
+        '''Validation'''
+        # split from train
+        if self.data.TrainValratio != None: 
+            print('split from train')
+            self.Valsub = self.Trainsub
+            self.Valsess= self.Trainsess
+            self.data.TrainData, self.data.ValData, self.data.TrainLabel, self.data.ValLabel=self.SplitfromTrain(self.data.TrainValratio)
 
-    #         def ok(event):
-    #             """Change heading text."""
-    #             table.heading(column, text=entry.get())
-    #             entry.destroy()
+            print('Val seleted data: ',self.data.ValData)   
+            print('shape',self.data.ValData._data.shape)
+            print('label shape', self.data.ValLabel.shape)
 
-    #         column = table.identify_column(event.x) # identify column
-    #         # tree.bbox work sonly with items so we have to get the bbox of the heading differently
-    #         x, y, width, _ = table.bbox(table.get_children('')[0], column) # get x and width (same as the one of any cell in the column)
-    #         # get vertical coordinates (y1, y2)
-    #         y2 = y
-    #         # get bottom coordinate
-    #         while table.identify_region(event.x, y2) != 'heading':  
-    #             y2 -= 1
-    #         # get top coordinate
-    #         y1 = y2
-    #         while table.identify_region(event.x, y1) == 'heading':
-    #             y1 -= 1
-    #         height = y2 - y1
-    #         y = y1
-    #         value = table.heading(column, 'text')
+        # choose val file 
+        elif self.data.ValFile != None: 
+            print('choose val file')    
+            self.data.ValData, self.data.ValLabel,self.Valsub, self.Valsess= self.Sortbycriteria(self.data.ValFile[0])
+            
+        
+            print('Val seleted data: ',self.data.ValData)   
+            print('shape',self.data.ValData._data.shape)
+            print('label shape', self.data.ValLabel.shape)
 
-    #     elif table.identify_region(event.x, event.y) == 'nothing': 
-    #         column = table.identify_column(event.x) # identify column
-    #         # check whether we are below the last row:
-    #         x, y, width, height =table.bbox(table.get_children('')[-1], column)
-    #         if event.y > y:
+        else:
+            print('No val data and labels')
+        
+    def SplitfromTrain(self, ratio):
+        iterate= False
+        TrainTestidx=self.SplitData(self.data.TrainData._data, self.data.TrainLabel,ratio= ratio, kfold='Stratified', iterate= iterate)
+        traindata= self.data.TrainData[TrainTestidx[0]]
+        testdata= self.data.TrainData[TrainTestidx[1]]
+        trainlabel= self.data.TrainLabel[TrainTestidx[0]]
+        testlabel= self.data.TrainLabel[TrainTestidx[1]]
 
-    #             def ok(event):
-    #                 """Change item value."""
-    #                 # create item
-    #                 item = table.insert("", "end", values=("", ""))
-    #                 table.set(item, column, entry.get())
-    #                 entry.destroy()
+        return traindata, testdata, trainlabel, testlabel
 
-    #             y += height
-    #             value = ""
-    #         else:
-    #             return
-    #     else:
-    #         return
-    #     # display the Entry   
-    #     entry = ttk.Entry(table)  # create edition entry
-    #     entry.place(x=x, y=y, width=width, height=height,
-    #                 anchor='nw')  # display entry on top of cell
-    #     entry.insert(0, value)  # put former value in entry
-    #     entry.bind('<FocusOut>', lambda e: entry.destroy())  
-    #     entry.bind('<Return>', ok)  # validate with Enter
-    #     entry.focus_set()
-
-    
-
-def Panel(Title, size, x_pad, y_pad):
-
-    win_main_x = wmainself.w_main.winfo_rootx()+ x_pad
-    win_main_y = wmainself.w_main.winfo_rooty()+ y_pad
-
-    newindow= tk.Toplevel()
-    newindow.wm_attributes('-topmost', True )
-    newindow.geometry(size)
-    newindow.geometry(f'+{win_main_x}+{win_main_y}')  
-    newindow.title(Title)
-    newindow.configure(background='White')
-
-    return newindow
-
-
-    
+    def Sortbycriteria(self, Filename):
+        
+        '''split file string into sublist, sessionlist'''# intlist
+        file= Filename.split('_') # revise: cross subject
+        SelectedSub = [int(i) for i in file[0] if i.isdigit()]
+        SelectedSub = [j for j in SelectedSub if j>0]
+        SelectedSession = [int(s) for s in file[1] if s.isdigit()]
+        
+        if self.data.ExcludedClass != None:
+            Eclass= self.data.ExcludedClass
+            self.data.ExcludedClass= [int(s) for s in Eclass ]
         
 
+        '''filtering subject/session/class/onset(revised)'''
+        include= self.data.Info['Subject'].isin(SelectedSub)
+        SelectedData= self.data.Info[include]
+        #print(SelectedData)
+        include= SelectedData['Session'].isin(SelectedSession)
+        SelectedData= SelectedData[include]
+        
+        if self.data.ExcludedClass != None: 
+            mask= SelectedData['Class'].isin(self.data.ExcludedClass)
+            SelectedData= SelectedData[~mask]
 
-if __name__ == '__main__':
-    gui= ExBrainable()
-    gui.w_main.mainloop()
+        # onsettime
+
+        '''select array by index'''
+        index= SelectedData.index
+        SelectedData= self.data.Data[Filename][index]
+        SelectedLabel= np.asarray(SelectedData.events[:,2])
+    
+        return SelectedData, SelectedLabel, SelectedSub, SelectedSession # dataframe 
+        #SelectedSub, SelectedSession : list .ex: [3]
+
+  
+
+       
+    '''iterate= False -> 只有kfold第一份，拿來當單純的split
+    iterate= True -> 完整的kfold
+    '''
+    def SplitData(self,data, label, ratio, kfold='Stratified', iterate= True):
+        TrainTestidx= [] # even: Train, odd: Test
+
+        if kfold == 'Stratified':
+            kf = StratifiedKFold(n_splits=ratio, shuffle= True, random_state= 1)
+            split= kf.split(data,label)
+        elif kfold == 'normal':
+            kf = KFold(n_splits=ratio, shuffle= True,random_state= 1)
+            split = kf.split(data)
+
+        for trainidx, testidx in split:
+            TrainTestidx.append(trainidx)
+            TrainTestidx.append(testidx)
+            if iterate ==False: # train/val split只需要第一份
+                break
+
+        
+        return TrainTestidx
+       
