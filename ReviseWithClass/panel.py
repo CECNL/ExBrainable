@@ -199,7 +199,11 @@ class Rename_Events_Panel():
             print(self.database.data.Data[fname].event_id)    
         
         CrossValidation_Panel(self.w, self.database)
-            
+
+
+'''
+class Crossvalidation_Panel: contains 2 tabs including the Individual panel and the Cross subject panel.
+'''
 
 class CrossValidation_Panel:
     def __init__(self, wRenamevent, database):
@@ -228,7 +232,8 @@ class CrossValidation_Panel:
    
     '''
 class Individual_Panel
-- state():防呆
+- kfoldstate():不同cv method -> frame disable/normal
+- state(): frame裡面的comobox/entry disable/normal 
 - Input2Database(): transfer entry values to database
     + checkemptyvalues(): empty entry show error
         completeNumber(): string to list ex: class= '1,2,3,4' ->  ['1']
@@ -354,7 +359,10 @@ class Individual_Panel:
     def Input2Database(self):
         self.data.ExcludedClass= self.CheckEmptyValues(self.data.ExcludedClass)
         self.data.SelectedOnset= self.CheckEmptyValues(self.data.SelectedOnset)
-        self.data.kfold= int(self.CheckEmptyValues(self.data.kfold))
+        if self.FileValue.get() ==2:
+            self.data.kfold= int(self.CheckEmptyValues(self.data.kfold))
+        elif self.FileValue.get()==1:
+            self.data.kfold= None
         self.data.autosplit= int(self.autosplitvar.get())
         self.CheckFile('Train')
         self.CheckFile('Val')
@@ -425,7 +433,286 @@ class Individual_Panel:
 
             elif str(box.get()) == 'Choose a file':
                 self.data.TestFile=str(self.TestFilesbox.get())
+
+'''class CrossSubject_Panel: similar to Individual Panel
+- ResetorConfirm(): choose file -> confirm button -> reset button -> rechoose files
+- CreateListbox(): create box of listing all files 
+- LOSOstate(): 不同cv method -> frame disable/normal
+- state(): is identical to functions in Individual_Panel
+- Input2Database(): is identical to functions in Individual_Panel
+
+'''
+class CrossSubject_Panel:
+    def __init__(self,w, Database):
+        self.w =w 
+        self.data = Database.data
+
+        self.CrossFile = tk.LabelFrame(self.w, text="Cross Validation File", height=150, bg='White', width=200, labelanchor='n')
+        self.Rangeframe = tk.LabelFrame(self.w, text="Selected Range", height=150, bg='White', width=200, labelanchor='n')
+        self.Trainframe = tk.LabelFrame(self.w, text="Train", height=150, bg='White', width=200, labelanchor='n')
+        self.Valframe = tk.LabelFrame(self.w, text="Validation", height=150, bg='White', width=200, labelanchor='n')
+        self.Testframe = tk.LabelFrame(self.w, text="Test", height=150, bg='White', width=200, labelanchor='n')
+        self.autosplitvar = tk.IntVar()
+        self.autosplitbutton = tk.Checkbutton(self.w, text='Auto split all files by formats above.',var=self.autosplitvar, onvalue=1, offvalue=0,  bg='White') 
+        
+        self.CrossFile.grid(row=0, column=0,padx=10,pady=5, ipady=4,sticky='w')
+        self.Rangeframe.grid(row=0, column=1,padx=10,pady=5,  ipady=4,sticky='w')
+        self.Trainframe.grid(row=1, column=0,padx=10,pady=5,  ipady=4,sticky='w')
+        self.Valframe.grid(row=1, column=1,padx=10,pady=5, ipady=4,sticky='w')
+        self.Testframe.grid(row=1, column=2,padx=10,pady=5, ipady=4,sticky='w')
+        self.autosplitbutton.grid(row=2, column=0,columnspan=2,padx=10,ipady=4,sticky='w')
+        tk.Button(self.w, text="Confirm", bg= 'White', command=self.Input2Database).grid(row=3, column=1,padx=15,pady = 10, ipady=2,sticky=tk.W)
+
+        '''crossfile frame'''
+        self.FileValue = tk.IntVar() 
+        NoneButton = tk.Radiobutton(self.CrossFile, text='None',variable= self.FileValue, value=1, bg= 'White', command = self.LOSOstate) 
+        LOSOButton = tk.Radiobutton(self.CrossFile, text='Leave-one-subject-out',variable= self.FileValue, value=2, bg= 'White', command = self.LOSOstate)
+        NoneButton.grid(row=0, column=0,padx=20,ipady=2,sticky=tk.W)
+        LOSOButton.grid(row=1, column=0,padx=20,ipady=2,sticky=tk.W) 
+        
+        '''rangeframe'''
+        tk.Label(self.Rangeframe, text="Excluded Class", bg= 'White').grid(row=0, column=0,padx=10,ipady=4,sticky=tk.W)
+        tk.Label(self.Rangeframe, text="Onset Time(ms)", bg= 'White').grid(row=1, column=0,padx=10,ipady=4,sticky=tk.W)
+        self.data.ExcludedClass= tk.Entry(self.Rangeframe) 
+        self.data.ExcludedClass.insert(0, 'ex: 1')
+        self.data.SelectedOnset= tk.Entry(self.Rangeframe)
+        self.data.SelectedOnset.insert(0, 'ex: -100~3000')
+      
+        self.data.ExcludedClass.grid(row=0, column=1, padx=10,ipady=4,sticky=tk.W)
+        self.data.SelectedOnset.grid(row=1, column=1, padx=10,ipady=4,sticky=tk.W)
+        
+
+        ''' frame of train/val/test'''
+        self.files= ['S01_1.set', 'S01_2.set']
+
+        '''Trainframe'''
+        tk.Label(self.Trainframe, text="Choose files ", bg= 'White').grid(row=0, column=0,padx=10,ipady=2,sticky=tk.W)
+        #box
+        self.TrainFilesbox= self.CreateListbox(self.Trainframe, self.files, row=1)
+        self.TrainFilesbox.grid(row=1, column=0,rowspan=2,columnspan=2, padx=10,ipady=4,sticky=tk.W)
+        self.TrainFilesbox['state']= 'disabled'
+        
+        #button
+        self.TrainConfirmButton= tk.Button(self.Trainframe, text="Confirm", bg= 'White', command=lambda:self.ResetorConfirm(self.TrainFilesbox, 'Train', reset=False))
+        self.TrainResetButton= tk.Button(self.Trainframe, text="Reset", bg= 'White', command=lambda:self.ResetorConfirm(self.TrainFilesbox,'Train', reset= True))
+        self.TrainConfirmButton.grid(row=3, column=0,padx=10,pady = 5, ipady=2,sticky=tk.W)
+        self.TrainResetButton.grid(row=3, column=1,padx=5,pady = 5, ipady=2,sticky=tk.W)
+
+        '''valframe'''
+        tk.Label(self.Valframe, text="File: ", bg= 'White').grid(row=0, column=0,padx=10,ipady=2,sticky=tk.W)
+        tk.Label(self.Valframe, text="Train/Val ratio: ", bg= 'White').grid(row=1, column=0,padx=10,ipady=2,sticky=tk.W)
+        tk.Label(self.Valframe, text="Choose files: ", bg= 'White').grid(row=2, column=0,padx=10,ipady=2,sticky=tk.W)
+        #box
+        self.ValFilebox = ttk.Combobox(self.Valframe, values=['None','Split from Train set','Choose a file'])
+        self.ValFilesbox= self.CreateListbox(self.Valframe, self.files, row=3 )
+        self.TrainValratiobox= tk.Entry(self.Valframe)
+
+        self.ValFilebox.grid(row=0, column=1,padx=10,ipady=2,sticky=tk.W)
+        self.TrainValratiobox.grid(row=1, column=1, padx=10,ipady=4,sticky=tk.W)
+        self.ValFilesbox.grid(row=2, column=1,rowspan=2,columnspan=2,padx=10,ipady=2,sticky=tk.W)
+        self.ValFilebox['state']='disabled'
+        self.ValFilesbox['state']='disabled'
+        self.TrainValratiobox['state']='disabled'
+        self.ValFilebox.bind('<<ComboboxSelected>>', lambda x :self.state('val'))
+
+        #button
+        self.ValConfirmButton= tk.Button(self.Valframe, text="Confirm", bg= 'White', command=lambda:self.ResetorConfirm(self.ValFilesbox, 'Val', reset=False))
+        self.ValResetButton= tk.Button(self.Valframe, text="Reset", bg= 'White', command=lambda:self.ResetorConfirm(self.ValFilesbox,'Val', reset= True))
+        self.ValConfirmButton.grid(row=5, column=1,padx=10,pady = 5, ipady=2,sticky=tk.W)
+        self.ValResetButton.grid(row=5, column=2,padx=0,pady = 5, ipady=2,sticky=tk.W)
+      
+
+        
+
+        '''Testframe'''
+        tk.Label(self.Testframe, text="File: ", bg= 'White').grid(row=0, column=0,padx=10,ipady=2,sticky=tk.W)
+        tk.Label(self.Testframe, text="Train/Test ratio: ", bg= 'White').grid(row=1, column=0,padx=10,ipady=2,sticky=tk.W)
+        tk.Label(self.Testframe, text="Choose files: ", bg= 'White').grid(row=2, column=0,padx=10,ipady=2,sticky=tk.W)
+        
+        #box
+        self.TestFilebox = ttk.Combobox(self.Testframe, values=['None','Split from Train set', 'Choose a file'])
+        self.TestFilesbox= self.CreateListbox(self.Testframe, self.files, row=2)
+        self.TrainTestratiobox= tk.Entry(self.Testframe) 
+
+        self.TestFilebox.grid(row=0, column=1,padx=10,ipady=2,sticky=tk.W)
+        self.TrainTestratiobox.grid(row=1, column=1, padx=10,ipady=4,sticky=tk.W)
+        self.TestFilesbox.grid(row=2, column=1,rowspan=2,columnspan=2, padx=10,ipady=2,sticky=tk.W)
+        self.TestFilebox.bind('<<ComboboxSelected>>', lambda x : self.state('test'))
+
+        self.TestFilebox['state']='disabled'
+        self.TestFilesbox['state']='disabled'
+        self.TrainTestratiobox['state']= 'disabled'
+
+        #button
+        self.TestConfirmButton= tk.Button(self.Testframe, text="Confirm", bg= 'White', command=lambda:self.ResetorConfirm(self.TestFilesbox, 'Test', reset=False))
+        self.TestResetButton= tk.Button(self.Testframe, text="Reset", bg= 'White', command=lambda:self.ResetorConfirm(self.TestFilesbox,'Test', reset= True))
+        self.TestConfirmButton.grid(row=4, column=1,padx=10,pady = 5, ipady=2,sticky=tk.W)
+        self.TestResetButton.grid(row=4, column=2,padx=5,pady = 5, ipady=2,sticky=tk.W)
+       
+    def ResetorConfirm(self,box,filetype, reset):
+        if reset ==False:
+            box['state']= 'disabled'
             
+            if filetype == 'Train':
+                self.data.TrainFile= [self.files[idx] for idx in box.curselection()]
+                self.TrainConfirmButton['state']= 'disabled'
+                self.TrainResetButton['state']= 'normal'
+                print(self.data.TrainFile)
+            elif filetype =='Val':
+                self.data.ValFile= box.curselection()
+                self.ValConfirmButton['state']= 'disabled'
+                self.ValResetButton['state']= 'normal'
+                
+            elif filetype == 'Test':
+                self.data.TestFile= box.curselection()
+                self.TestConfirmButton['state']= 'disabled'
+                self.TestResetButton['state']= 'normal'
+        else:
+            box['state']= 'normal'
+
+            if filetype == 'Train':
+                self.data.TrainFile= None
+                print(self.data.TrainFile)
+                self.TrainConfirmButton['state']= 'normal'
+                self.TrainResetButton['state']= 'disabled'
+            elif filetype =='Val':
+                self.data.ValFile= None
+                self.ValConfirmButton['state']= 'normal'
+                self.ValResetButton['state']= 'disabled'
+            elif filetype == 'Test':
+                self.data.TestFile= None
+                self.TestConfirmButton['state']= 'normal'
+                self.TestResetButton['state']= 'disabled'
+        
+    def CreateListbox(self, frame, files, row):
+        box = tk.Listbox(frame, selectmode=tk.EXTENDED)
+        [box.insert(tk.END, file) for file in files]
+
+        sb = tk.Scrollbar(frame, orient=tk.VERTICAL)
+        sb.grid(row=row,column=2,sticky=tk.N+tk.S+tk.W)
+        box.config(yscrollcommand=sb.set)
+        sb.config(command=box.yview)
+
+        return box
+    
+    def LOSOstate(self):
+        if int(self.FileValue.get()) == 1 : #none
+           self.TrainFilesbox['state']= 'normal'
+           self.ValFilebox['state']='readonly'
+           self.TestFilebox['state']='readonly'
+        
+           self.TrainConfirmButton['state']= 'normal'
+           self.ValConfirmButton['state']= 'normal'
+           self.TestConfirmButton['state']= 'normal'
+           
+
+        elif int(self.FileValue.get()) == 2 : #LOSO
+            self.TrainFilesbox['state']= 'disabled'
+            self.ValFilebox['state']='disabled'
+            self.ValFilesbox['state']='disabled'
+            self.TrainValratiobox['state']='disabled' 
+            self.TestFilebox['state']='disabled'
+            self.TestFilesbox['state']='disabled'
+            self.TrainTestratiobox['state']= 'disabled'
+
+            self.TrainConfirmButton['state']= 'disabled'
+            self.TrainResetButton['state']= 'disabled'
+            self.ValConfirmButton['state']= 'disabled'
+            self.ValResetButton['state']= 'disabled'
+            self.TestConfirmButton['state']= 'disabled'
+            self.TestResetButton['state']= 'disabled'
+
+    def state(self, box):
+        
+        if box == 'val' :
+            if str(self.ValFilebox.get())== 'Choose a file':
+                self.ValFilesbox['state']= 'normal'
+                self.TrainValratiobox['state']= 'disable'
+
+            elif str(self.ValFilebox.get())=='Split from Train set':
+                self.TrainValratiobox['state']= 'normal'
+                self.ValFilesbox['state']= 'disabled'
+
+        elif box == 'test':
+            if str(self.TestFilebox.get())== 'Choose a file':
+                self.TestFilesbox['state']= 'normal' 
+                self.TrainTestratiobox['state']= 'disable'
+
+            elif str(self.TestFilebox.get())=='Split from Train set':
+                self.TrainTestratiobox['state']= 'normal' 
+                self.TestFilesbox['state']= 'disable' 
+      
+    def Input2Database(self):
+        self.data.ExcludedClass= self.CheckEmptyValues(self.data.ExcludedClass)
+        self.data.SelectedOnset= self.CheckEmptyValues(self.data.SelectedOnset)
+        self.data.autosplit= int(self.autosplitvar.get())
+        self.CheckFile('Train')
+        self.CheckFile('Val')
+        self.CheckFile('Test')
+
+        print('cv method: ', self.FileValue.get()) # 1> self defined 2> LOSO
+        print('Trainfile: ', self.data.TrainFile)
+        print('Valfile: ',self.data.ValFile)
+        print('Testfile: ', self.data.TestFile)
+        print('TrainValRatio:',self.data.TrainValratio)
+        print('TrainTestratio: ',self.data.TrainTestratio)
+        print(f'excluded class: {self.data.ExcludedClass}')
+        print('autosplit: ', self.data.autosplit)
+        self.w.destroy()
+
+        # '''Data Sort and Split'''
+        # DataSortandSplit(self.data)
+    
+    def CheckFile(self, filetype):
+        if filetype == 'Train':
+            self.data.TrainFile=self.data.TrainFile
+            
+        if filetype =='Val':
+            box = self.ValFilebox
+            
+            if str(box.get()) == 'Split from Train set':
+                self.data.TrainValratio= int(self.TrainValratiobox.get())
+
+            elif str(box.get()) == 'Choose a file':
+                self.data.ValFile=self.data.ValFile
+
+        elif filetype =='Test':
+            box = self.TestFilebox
+            if str(box.get()) == 'Split from Train set':
+                self.data.TrainTestratio= int(self.TrainTestratiobox.get())
+
+            elif str(box.get()) == 'Choose a file':
+                self.data.TestFile= self.data.TestFile
+
+    def CheckEmptyValues(self, value):
+
+        #check empty values
+        if len(value.get()) != 0:
+                temp= str(value.get())
+                value= self.CompleteNumber(temp)
+                
+        else:
+                messagebox.showerror("Error",f'You must enter a number.', parent=self.w)
+                
+        return temp #str
+    
+    def CompleteNumber(self,string): # for 1~5 -> 1,2,3,4,5
+        # if onsetorclass ='onset':
+        #     if '~' in string: 
+        #         string= string.split('~')
+        #         strList = [i for i in range(int(string[0]),int(string[1]))] 
+        #         #strList= [sub for sub in self.AllSub if sub >= string[0] and sub <= string[1]]
+
+        if ',' in string:
+            
+            intList= [int(i) for i in string.split(',')]
+            output= intList
+
+        else:
+            strList= string
+            output= string 
+        
+        return output # string or intlist            
     
 class Load_Structure_Panel:
     def __init__(self, database, modelframe, filemenu, modelmenu):
