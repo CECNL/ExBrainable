@@ -19,6 +19,9 @@ python GUI.py
 ```bash
 pip install ExBrainable
 ```
+### motor imagery data : BCICIV2a 
+- data and labels are separated
+- download [here](https://drive.google.com/drive/folders/1-M-ZU1BbfwdiFP-jkPcCfu058fRzksSI?usp=sharing)
 ## Video demonstration 
 This is a brief video demonstration of ExBrainable : https://youtu.be/m40z2klbmtg
 ## Documentation
@@ -28,5 +31,5 @@ This is a brief video demonstration of ExBrainable : https://youtu.be/m40z2klbmt
 
 ### develop 
 1. ReviseWithClass資料夾
-- 放設計架構之後的code，data在[這裡](https://drive.google.com/drive/folders/1oMi3sfp0MRpumd82yfguO083Fi2MIONK?usp=sharing)
+- 放設計架構之後的code，epoching data在[這裡](https://drive.google.com/drive/folders/1oMi3sfp0MRpumd82yfguO083Fi2MIONK?usp=sharing)，
 - dev資料夾獨立測試用
