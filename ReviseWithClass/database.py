@@ -1,6 +1,6 @@
-import torch
-import torch.optim as optim
-import torch.nn as nn
+# import torch
+# import torch.optim as optim
+# import torch.nn as nn
 import numpy as np
 
 
@@ -74,15 +74,17 @@ class Setting_Variable():
 
         self.win_main_x= 0
         self.win_main_y= 0
+
         self.sf = 0
         self.tp = 0
+        self.net = 0
+        self.n_class = 0
         ######
         self.w_bar = 0
         self.win_main = 0
         self.saveweightfolder = 0
         self.loadweightfile = 0
         self.val_ratio = 0
-        self.n_class = 0
         self.epochs = 0
         self.lr = 0
         self.sub = 0
@@ -91,7 +93,7 @@ class Setting_Variable():
         self.y_pred = 0
         self.acc = 0
         self.kappa = 0
-        self.net = 0
+        
         
         self.ch = 0
         
