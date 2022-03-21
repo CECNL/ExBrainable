@@ -5,17 +5,15 @@ import torch
 import torch.nn as nn
 import math
 
-
-
-
 class EEGNet(nn.Module):
-    def __init__(self):
+    def __init__(self, database):
         super(EEGNet, self).__init__()
 
-        self.tp= scheme_var.tp
-        self.ch= scheme_var.ch
-        self.sf= scheme_var.sf
-        self.n_class=scheme_var.n_class
+        self.tp= database.set_var.tp
+        
+        self.ch= database.set_var.ch
+        self.sf= database.set_var.sf
+        self.n_class= database.set_var.n_class
         self.half_sf= math.floor(self.sf/2)
         print(f'timepoint:{self.tp}',
               f'\nch:{self.ch}',
@@ -71,13 +69,14 @@ class EEGNet(nn.Module):
         return x
 
 class SCCNet(nn.Module):
-    def __init__(self):
+    def __init__(self,database):
         super(SCCNet, self).__init__() # input:bs, 1, channel, sample
 
-        self.tp= scheme_var.tp
-        self.ch= scheme_var.ch
-        self.sf= scheme_var.sf
-        self.n_class=scheme_var.n_class
+        self.tp= database.set_var.tp
+        self.ch= database.set_var.ch
+        self.sf= database.set_var.sf
+        self.n_class= database.set_var.n_class
+
         self.octsf= math.floor(self.sf*0.1)
 
         print(f'timepoint:{self.tp}',
@@ -120,13 +119,14 @@ class SCCNet(nn.Module):
 
 
 class ShallowConvNet(nn.Module):
-    def __init__(self):
+    def __init__(self,database):
         super(ShallowConvNet, self).__init__()
 
-        self.tp= scheme_var.tp
-        self.ch= scheme_var.ch
-        self.sf= scheme_var.sf
-        self.n_class=scheme_var.n_class
+        self.tp= database.set_var.tp
+        self.ch= database.set_var.ch
+        self.sf= database.set_var.sf
+        self.n_class= database.set_var.n_class
+        
         self.octsf= int(math.ceil(self.sf*0.1)) #13
         self.tpconv1= int(self.tp- self.octsf+1) #550 time point after conv1 
         self.apstride= int(math.ceil(self.octsf/2))
