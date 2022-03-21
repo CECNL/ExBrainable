@@ -7,25 +7,10 @@ from tkinter import messagebox
 from window import new_window
 from Load_data import LoadData, DataSortandSplit
 
-
-class Model_Summary_Panel():
-    def __init__(self):
-        pass
-
-
-
-class Load_Structure_Panel():
-    def __init__(self):
-        pass
-
-
-
-class Model_Setting_Panel():
-    def __init__(self):
-        pass
-
-
-
+'''
+class Load_Data_Panel:
+ps. from Load_data import LoadData, DataSortandSplit
+'''
 class Load_Data_Panel():
     def __init__(self, database):
         self.database= database
@@ -51,15 +36,24 @@ class Load_Data_Panel():
 
         ttk.Button(self.w ,text="Confirm", command=(lambda:Rename_Events_Panel(self.w, self.database)), width=10).pack(fill='both', ipadx=1 ,ipady= 5,padx=20 ,pady=5)
 
+'''
+class Rename_Events_Panel
+- uniqueevents(): find all eventsid, eventype from all input files 
+- Eventable(): build a table listing all eventids, eventype 
+- Editname(): functions of renaming events by clicking the table cell
+- updatevent(): update changed events to all original events
+'''
 class Rename_Events_Panel():
     def __init__(self, wdata, database):
         self.database= database
         wdata.destroy()
         self.w= new_window('Rename Events', '500x250', x_pad=-10, y_pad=180, database= self.database)
         self.uniquevents()
+        self.Eventable()
+
         print('len of eventtype', len(self.uniquevent.keys()))
         print(self.uniquevent)
-        self.Eventable()
+        self.database.set_var.n_class= len(self.uniquevent.keys())
 
     def uniquevents(self):        
         self.uniquevent={}
@@ -228,7 +222,7 @@ class CrossValidation_Panel:
         '''Tab1: Individual Panel
            Tab2: Cross Subject Panel'''
         Individual_Panel(Tab1, self.database)
-        #CrossSubject_Panel(Tab2, self.database)
+        CrossSubject_Panel(Tab2, self.database)
    
     '''
 class Individual_Panel
@@ -713,16 +707,23 @@ class CrossSubject_Panel:
             output= string 
         
         return output # string or intlist            
-    
+
+'''
+class Load_Structure_Panel
+- ExecModel(): 
+1. get values of sf, tp, n_class
+2. get model structure from models.py
+3. display model info on dashboard 
+'''
 class Load_Structure_Panel:
     def __init__(self, database, modelframe, filemenu, modelmenu):
-
+ 
         self.database= database
         self.modelframe= modelframe
         self.filemenu= filemenu
         self.modelmenu= modelmenu
-        self.win_lms=new_window(Title='Load model structure', size='500x200', x_pad=-10, y_pad=220, database=self.database)
-        self.modelist = ttk.Combobox(self.win_lms,
+        self.w=new_window(Title='Load model structure', size='500x200', x_pad=-10, y_pad=220, database=self.database)
+        self.modelist = ttk.Combobox(self.w,
                         values=['SCCNet',
                                 'EEGNet',
                                 'ShallowConvNet',
@@ -730,34 +731,96 @@ class Load_Structure_Panel:
                         state="readonly"
                 )
 
-        Confirm = ttk.Button(self.win_lms ,text="Confirm", command=(self.model_select))
+        Confirm = ttk.Button(self.w ,text="Confirm", command=(self.ExecModel))
         self.modelist.pack()
         Confirm.pack()
-
+    
     def ExecModel(self):
         
-        '''Get values of sf tp ch n_class'''
-        '''exec models'''
+        from models import EEGNet, ShallowConvNet, SCCNet
+        '''get entry values'''
+        fnames=list(self.database.data.Data.keys())
+        self.database.set_var.n_ch=len(self.database.data.Data[fnames[0]].ch_names)
+        # self.database.set_var.sf= self.database.set_var.sf.get()
+        # if len(self.database.set_var.tp.get())!=0:
+        #     self.database.set_var.tp= self.database.set_var.tp.get()
         
-        exec(open('G:/我的雲端硬碟/109_2 course/Project/ExBrainable/ExBrainable/ReviseWithClass/models.py').read(), globals()) #put all variable to globals()
+        '''exec models'''
         name = self.modelist.get()
-        print(name)
-        self.database.model.net= eval(str(name+'()'))
+        #exec(open('G:/我的雲端硬碟/109_2 course/Project/ExBrainable/ExBrainable/ReviseWithClass/models.py').read(), globals()) #put all variable to globals()
+        self.database.model.net= eval(str(name+'(self.database)'))
 
+        '''display info on dashboard'''
+        print(self.database.model.net)
         tk.Label(self.modelframe, text=name, bg= 'White').grid(row=0, column=1,  sticky=tk.W ) 
         self.filemenu.entryconfig("Load Model Weight", state= 'normal')
         self.modelmenu.entryconfig("Training Setting", state="normal")
         
-        self.win_lms.destroy()
+        self.w.destroy()
 
-
-
+    
 
 class Load_Weight_Panel():
     def __init__(self):
         pass
+'''
+class TrainingSetting_Panel:
+- save_weight_folder()
+- Input2database(): store entry variables to database 
+'''
+class TrainingSetting_Panel:
+    def __init__(self, database, modelframe):
+        self.database= database
+        self.modelframe= modelframe
+        #self.Trainmenu= Trainmenu
+
+        self.w=new_window(Title='Training Setting ', size='500x200', x_pad=-10, y_pad=180, database= self.database)
+        #tk.Label(self.w, text="Validation split :　", bg= 'White').grid(row=0,padx=20,ipady=4,  sticky=tk.W)
+        tk.Label(self.w, text="Batch Size :　", bg= 'White').grid(row=1,padx=20,ipady=4,  sticky=tk.W)
+        tk.Label(self.w, text="Epoch :　", bg= 'White').grid(row=2, column=0, padx=20,ipady=4,  sticky=tk.W)
+        tk.Label(self.w, text="Learning Rate :　", bg= 'White').grid(row=3, column=0, padx=20,ipady=4,  sticky=tk.W)
+        tk.Label(self.w, text="Save Weight to : 　", bg= 'White').grid(row=4,column=0, padx=20,ipady=4,  sticky=tk.W)
+        
+        #self.Valratio = tk.Entry(self.w)
+        self.Batchsize = tk.Entry(self.w)
+        self.Epoch = tk.Entry(self.w)
+        self.Lr = tk.Entry(self.w)
+        self.Saveweight = tk.Entry(self.w)
+
+        #self.Valratio.grid(row=0, column=1)
+        self.Batchsize.grid(row=1, column=1)
+        self.Epoch.grid(row=2, column=1)
+        self.Lr.grid(row=3, column=1)
+        self.Saveweight.grid(row=4, column=1)
+        ttk.Button(self.w, text="Folder", command=(self.save_weight_folder), width=10).grid(row=4,column=2)
+        ttk.Button(self.w ,text="Confirm", command=(self.Input2database), width=10).grid(row=6, column=1)
+
+    def save_weight_folder(self):
+        #global shortfolder
+        folder= tk.filedialog.askdirectory()
+        self.shortfolder= "/".join(folder.split('/')[-3:])
+        self.Saveweight.insert(tk.END, folder)
+        self.database.set_var.saveweightfolder= folder    
 
 
+    def Input2database(self):
+
+        #self.database.set_var.val_ratio= float(self.Valratio.get())
+        self.database.set_var.bs= int(self.Batchsize.get())
+        self.database.set_var.epochs= int(self.Epoch.get())
+        self.database.set_var.lr= float(self.Lr.get())
+
+        self.w.destroy()
+
+        '''display on dashboard'''
+        #tk.Label(self.modelframe, text= self.database.set_var.val_ratio, bg= 'White').grid(row=2, column=1,  sticky=tk.W )
+        tk.Label(self.modelframe, text= self.database.set_var.bs, bg= 'White').grid(row=3, column=1,  sticky=tk.W )
+        tk.Label(self.modelframe, text= self.database.set_var.epochs, bg= 'White').grid(row=4, column=1 ,  sticky=tk.W)
+        tk.Label(self.modelframe, text= self.database.set_var.lr, bg= 'White').grid(row=5, column=1,  sticky=tk.W)
+        tk.Label(self.modelframe, textvariable= self.shortfolder , bg= 'White').grid(row=6, column=1,  sticky=tk.W)
+
+        '''enable model training button'''
+        #self.Trainmenu.entryconfig("Model Training", state="normal")
 
 class Training_Panel():
     def __init__(self):
