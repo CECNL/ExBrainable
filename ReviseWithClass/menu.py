@@ -28,7 +28,7 @@ class Load_Model_Menu():
         self.database= database
         self.modelmenu = modelmenu
         self.modelmenu.add_command(label='Model Selection', command=lambda:panel.Load_Structure_Panel(self.database, modelframe, filemenu, self.modelmenu))
-        self.modelmenu.add_command(label='Training Setting', command=self.create_model_setting_panel)
+        self.modelmenu.add_command(label='Training Setting', command=lambda:panel.TrainingSetting_Panel(self.database, modelframe))
         #self.modelmenu.add_command(label='Model Summary', command=self.create_summary_panel)
 
     
@@ -47,8 +47,9 @@ class Load_Model_Menu():
 
 
 class Training_Menu():
-    def __init__(self, trainmenu, database):
+    def __init__(self, trainmenu, database, modelframe):
         self.trainmenu = trainmenu
+        self.modelframe= modelframe
         self.trainmenu.add_command(label='Model Training', command=self.create_training_panel)
     
 
