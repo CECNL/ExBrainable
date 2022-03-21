@@ -37,6 +37,9 @@ class LoadData:
             print(self.data.DataInfo)
 
     
+
+        
+    
     def ReadLabels(self, frame):
         files = filedialog.askopenfilenames()
         print('Read Labels')
@@ -76,7 +79,7 @@ class LoadData:
             'Class': raw.events[:,2],
             'Onset time':  onset}
         df= pd.DataFrame(data)
-
+        
         return df
         
 
@@ -167,7 +170,7 @@ class DataSortandSplit:
             print('shape',self.data.TestData._data.shape)
             print('label shape', self.data.TestLabel.shape)
          # choose test file
-         
+           
         elif self.data.TestFile != None: 
             print('choose test file')    
             self.data.TestData, self.data.TestLabel, self.Testsub, self.Testsess =self.Sortbycriteria(self.data.TestFile)
@@ -225,7 +228,7 @@ class DataSortandSplit:
         SelectedSub = [j for j in SelectedSub if j>0]
         SelectedSession = [int(s) for s in file[1] if s.isdigit()]
         
-        if self.data.ExcludedClass != None:
+        if self.data.ExcludedClass != 'ex: 1':
             Eclass= self.data.ExcludedClass
             self.data.ExcludedClass= [int(s) for s in Eclass ]
         
@@ -237,7 +240,7 @@ class DataSortandSplit:
         include= SelectedData['Session'].isin(SelectedSession)
         SelectedData= SelectedData[include]
         
-        if self.data.ExcludedClass != None: 
+        if self.data.ExcludedClass != 'ex: 1': 
             mask= SelectedData['Class'].isin(self.data.ExcludedClass)
             SelectedData= SelectedData[~mask]
 
