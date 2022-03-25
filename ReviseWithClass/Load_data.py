@@ -8,7 +8,12 @@ import mne
 from tkinter import filedialog
 import pandas as pd
 
-
+'''
+(almost finished)
+class LoadData
+- ReadData
+- ReadLabels(not finished)
+'''
 class LoadData:
     def __init__(self,database):
         self.data= database.data
@@ -84,8 +89,9 @@ class LoadData:
         
 
 '''
+(finished)
 class DataSplit
-- Info (should move to load data)
+- Info 
   DataInfo(): stack info of each file
   MakeInfo(): sub/session/onset/class of event -> pd.dataframe
 - Sort(): split data based on choices of 1. None 2. Split from train 3. choose a file
