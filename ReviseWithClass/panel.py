@@ -7,7 +7,10 @@ from tkinter import messagebox
 from window import new_window
 from Load_data import LoadData, DataSortandSplit
 
+
+
 '''
+(finished)
 class Load_Data_Panel:
 ps. from Load_data import LoadData, DataSortandSplit
 '''
@@ -37,6 +40,7 @@ class Load_Data_Panel():
         ttk.Button(self.w ,text="Confirm", command=(lambda:Rename_Events_Panel(self.w, self.database)), width=10).pack(fill='both', ipadx=1 ,ipady= 5,padx=20 ,pady=5)
 
 '''
+(finished)
 class Rename_Events_Panel
 - uniqueevents(): find all eventsid, eventype from all input files 
 - Eventable(): build a table listing all eventids, eventype 
@@ -196,6 +200,7 @@ class Rename_Events_Panel():
 
 
 '''
+(finished)
 class Crossvalidation_Panel: contains 2 tabs including the Individual panel and the Cross subject panel.
 '''
 
@@ -224,7 +229,9 @@ class CrossValidation_Panel:
         Individual_Panel(Tab1, self.database)
         CrossSubject_Panel(Tab2, self.database)
    
-    '''
+'''
+(almost finished)需要將combobox 改為listbox，因為listbox可以同時選擇多個檔案
+
 class Individual_Panel
 - kfoldstate():不同cv method -> frame disable/normal
 - state(): frame裡面的comobox/entry disable/normal 
@@ -428,7 +435,10 @@ class Individual_Panel:
             elif str(box.get()) == 'Choose a file':
                 self.data.TestFile=str(self.TestFilesbox.get())
 
-'''class CrossSubject_Panel: similar to Individual Panel
+'''
+(almost finished): 需要加入、測試class DataSortandSplit
+
+class CrossSubject_Panel: similar to Individual Panel
 - ResetorConfirm(): choose file -> confirm button -> reset button -> rechoose files
 - CreateListbox(): create box of listing all files 
 - LOSOstate(): 不同cv method -> frame disable/normal
@@ -709,6 +719,7 @@ class CrossSubject_Panel:
         return output # string or intlist            
 
 '''
+(finished)
 class Load_Structure_Panel
 - ExecModel(): 
 1. get values of sf, tp, n_class
@@ -764,6 +775,7 @@ class Load_Weight_Panel():
     def __init__(self):
         pass
 '''
+(finished)
 class TrainingSetting_Panel:
 - save_weight_folder()
 - Input2database(): store entry variables to database 
