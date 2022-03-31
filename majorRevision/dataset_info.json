@@ -1,0 +1,21 @@
+{
+    "fileNames": [
+        "S03_1.set"
+    ],
+    "labelFileNames": [
+        "test.txt"
+    ],
+    "channels": 22,
+    "sampling rate": 125,
+    "trials": 288,
+    "timepoints": 562,
+    "onset": null,
+    "shape": [
+        22,
+        288,
+        562
+    ],
+    "subject": null,
+    "montage": null,
+    "session": null
+}
