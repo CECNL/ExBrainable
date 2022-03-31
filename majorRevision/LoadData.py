@@ -14,6 +14,7 @@ import pandas as pd
 #======= Json file I/O =======
 # keys in json file: camelCased
 # json file indentation on windows: Alt + Shift + F
+# json file defaults should be cleared in final version.
 
 def saveInfo(fname, key, value):
     """
@@ -51,12 +52,25 @@ def ReadData(mode="d"):
         key = "labelFileNames"
     
     fileList = getInfo('dataset_info.json', key)
+    subList = getInfo('dataset_info.json', 'subjects')
+    sessionList = getInfo('dataset_info.json', 'sessions')
+    subject = 0
+    session = 0
 
     for t in fileTuple:  # avoided listing listed filename
         if not (t in fileList):
             fileList.append(t) # support cross folder file reading
+            subject = t.split('/')[-1].split('_')[0]
+            subList.append(int(subject[1:])) # subject number
+            session = t.split('/')[-1].split('_')[1]
+            sessionList.append(int(session[:-4])) #session number
+            print('sub: ', subject, ' session: ', session)
+            saveInfo('dataset_info.json', key, fileList)
+            saveInfo('dataset_info.json', 'subjects', subList)
+            saveInfo('dataset_info.json', 'sessions', sessionList)
 
-    saveInfo('dataset_info.json', key, fileList)
+# def renameEvent():
+#     eventDict =  fileList = getInfo('dataset_info.json', 'events')
 
 
 class database:

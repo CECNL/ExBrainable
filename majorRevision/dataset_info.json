@@ -15,7 +15,16 @@
         288,
         562
     ],
-    "subject": null,
+    "subjects": [
+        3
+    ],
     "montage": null,
-    "session": null
+    "sessions": [
+        1
+    ],
+    "events": {
+        "0": "1",
+        "1": "2",
+        "2": "3"
+    }
 }
