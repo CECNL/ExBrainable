@@ -31,11 +31,13 @@ class Load_Data_Panel():
         ttk.Button(self.yframes, text='Add Files', command=(lambda : d.ReadLabels(self.yframes)), width=10).pack(fill='both', ipadx=1 ,padx=20 ,pady=5)
         
         tk.Label(self.properyframe, text="Sampling Rate :　", bg= 'White').grid(row=0, column=0, sticky=tk.W,padx=10, pady=5)
-        tk.Label(self.properyframe, text="Timepoint (only load model weight) :  ", bg= 'White').grid(row=1, column=0, sticky=tk.W,padx=10, pady=5)
-        self.database.set_var.sf = tk.Entry(self.properyframe)
-        self.database.set_var.tp = tk.Entry(self.properyframe)
-        self.database.set_var.sf.grid(row=0, column=1, sticky=tk.W)
-        self.database.set_var.tp.grid(row=1, column=1, sticky=tk.W)
+        tk.Label(self.properyframe, text="Timepoint :  ", bg= 'White').grid(row=1, column=0, sticky=tk.W,padx=10, pady=5)
+        self.database.set_var.sf =  tk.StringVar()
+        self.database.set_var.tp =  tk.StringVar()
+        self.sfentry= tk.Entry(self.properyframe, textvariable=self.database.set_var.sf)
+        self.tpentry= tk.Entry(self.properyframe,textvariable=self.database.set_var.tp)
+        self.sfentry.grid(row=0, column=1, sticky=tk.W)
+        self.tpentry.grid(row=1, column=1, sticky=tk.W)
 
         ttk.Button(self.w ,text="Confirm", command=(lambda:Rename_Events_Panel(self.w, self.database)), width=10).pack(fill='both', ipadx=1 ,ipady= 5,padx=20 ,pady=5)
 
@@ -752,9 +754,9 @@ class Load_Structure_Panel:
         '''get entry values'''
         fnames=list(self.database.data.Data.keys())
         self.database.set_var.n_ch=len(self.database.data.Data[fnames[0]].ch_names)
-        # self.database.set_var.sf= self.database.set_var.sf.get()
-        # if len(self.database.set_var.tp.get())!=0:
-        #     self.database.set_var.tp= self.database.set_var.tp.get()
+        self.database.set_var.sf= self.CheckEmptyValues(self.database.set_var.sf)
+        self.database.set_var.tp= self.CheckEmptyValues(self.database.set_var.tp)
+        
         
         '''exec models'''
         name = self.modelist.get()
@@ -769,7 +771,16 @@ class Load_Structure_Panel:
         
         self.w.destroy()
 
-    
+    def CheckEmptyValues(self, value):
+
+        #check empty values
+        if len(value.get()) != 0:
+                temp= int(value.get())
+                
+        else:
+                messagebox.showerror("Error",f'You must enter a number.', parent=self.w)
+                
+        return temp #str
 
 class Load_Weight_Panel():
     def __init__(self):
