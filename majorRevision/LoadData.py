@@ -15,28 +15,73 @@ import pandas as pd
 # keys in json file: camelCased
 # json file indentation on windows: Alt + Shift + F
 # json file defaults should be cleared in final version.
+def jsonValidation(key, value):
+    """
+    checking value datatype/filetype validity before dump into json file
+    """
+
+    listSet = {"fileNames", "labelFileNames", "shape", "subjects", "sessions"}
+    intSet = {"channels", "sampling rate", "trials", "timepoints"}
+    # others: montage, onset time
+    if key in listSet:
+        try:
+            if(key == "fileNames" and isinstance(value[0], str)):
+                if ('.set' in value or '.edf' in value):
+                    return
+                else:
+                    raise TypeError('dataset file should be in .set or .edf format')
+            if(key=="labelFileNames" and isinstance(value[0], str)):
+                if ('.mat' in value or '.txt' in value):
+                    return
+                else:
+                    raise TypeError('label file should be in .mat or .txt format')
+            
+            if(isinstance(value[0], int)):
+                return
+            typeMsg = 'string'  if (key == "fileNames" or key=="labelFileNames") else'int'
+            raise TypeError('value type for %s field expected to be %s'%(key, typeMsg))
+        except TypeError as e:
+            print(repr(e))
+    
+    elif key in intSet:
+        try:
+            if(isinstance(value, int)):
+                return
+            else:
+                raise TypeError('value type for %s field should be int'%(key))
+        except TypeError as e:
+            print(repr(e))   
 
 def saveInfo(fname, key, value):
     """
     fname: json filename to open
     {key: value} to store 
     """
-    with open (fname) as fp:
-        file_data = json.load(fp) # read as dict
-    file_data[key] = value
-    json.dump(file_data, open(fname, 'w'))
+    try:
+        with open (fname) as fp:
+            file_data = json.load(fp) # read as dict
+        
+        jsonValidation(key, value) # caught value type error
+        file_data[key] = value
+        json.dump(file_data, open(fname, 'w'))
+    except FileNotFoundError as e: # file not found error
+        print(repr(e))
+    except KeyError as e: # key not in json error
+        print(repr(e))
     
 def getInfo(fname, key):
     """
     fname: json filename to open
     key of value to get 
     """
-    with open (fname) as fp:
-        file_data = json.load(fp) # read as dict
-    return file_data[key]
-
-
-
+    try:
+        with open (fname) as fp:
+            file_data = json.load(fp) # read as dict
+        return file_data[key]
+    except FileNotFoundError as e:
+        print(repr(e))
+    except KeyError as e:
+        print(repr(e))
 
 def ReadData(mode="d"):
     """
@@ -58,16 +103,19 @@ def ReadData(mode="d"):
     session = 0
 
     for t in fileTuple:  # avoided listing listed filename
-        if not (t in fileList):
+        if t not in fileList:
             fileList.append(t) # support cross folder file reading
             subject = t.split('/')[-1].split('_')[0]
-            subList.append(int(subject[1:])) # subject number
             session = t.split('/')[-1].split('_')[1]
-            sessionList.append(int(session[:-4])) #session number
-            print('sub: ', subject, ' session: ', session)
-            saveInfo('dataset_info.json', key, fileList)
-            saveInfo('dataset_info.json', 'subjects', subList)
-            saveInfo('dataset_info.json', 'sessions', sessionList)
+            try:
+                subList.append(int(subject[1:])) # subject number
+                sessionList.append(int(session[:-4])) #session number
+                print('sub: ', subject, ' session: ', session)
+                saveInfo('dataset_info.json', key, fileList)
+                saveInfo('dataset_info.json', 'subjects', subList)
+                saveInfo('dataset_info.json', 'sessions', sessionList)
+            except ValueError as e: # subj or session is not numeric string
+                print(repr(e))
 
 # def renameEvent():
 #     eventDict =  fileList = getInfo('dataset_info.json', 'events')
@@ -87,12 +135,21 @@ class database:
             try:    
                 if '.set' in fn: 
                     data = mne.io.read_epochs_eeglab(fn, uint16_codec='latin1') 
-                if '.edf' in fn: 
+                elif '.edf' in fn: 
                     data= mne.io.read_raw_edf(fn,preload= True) 
                 self.Data[fn] = data
-            except TypeError:
-                print('The file format is not supported.')
-        print('data',self.Data)
+                
+                shape = getInfo('dataset_info.json', "shape")
+
+                if shape == []:
+                    shape= list(data._data.shape)
+                if shape != data._data.shape:
+                    raise ValueError('Data shape inconsistent: should be %s'%(str(shape)))
+            except OSError as e: # failed to open file?
+                print(repr(e))
+            except ValueError as e: #shape inconsistent
+                print(repr(e))
+        
 
     def setLabel(self):
         """
@@ -110,8 +167,8 @@ class database:
                     fp.close()
 
                 self.Label[fn] = label
-            except TypeError:
-                print('The file format is not supported.')
+            except OSError as e:
+                print(repr(e))
 
         print('label', self.Label)
 

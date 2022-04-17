@@ -2,5 +2,7 @@ from LoadData import *
 
 
 d = database()
-ReadData('l')
+ReadData('d')
 d.setData()
+
+# S07 & S03 are from different dataset
