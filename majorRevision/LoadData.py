@@ -117,8 +117,18 @@ def ReadData(mode="d"):
             except ValueError as e: # subj or session is not numeric string
                 print(repr(e))
 
-# def renameEvent():
-#     eventDict =  fileList = getInfo('dataset_info.json', 'events')
+def setEventId():
+    """
+    edit event id
+    """
+    IdDict = getInfo('dataset_info.json', "event_ids")
+    newDict = dict()
+    # auto?
+    i = 0
+    for key, value in IdDict:
+        newDict[i] = value
+        i+=1
+    saveInfo('dataset_info.json', "event_ids", newDict)
 
 
 class database:
@@ -138,13 +148,23 @@ class database:
                 elif '.edf' in fn: 
                     data= mne.io.read_raw_edf(fn,preload= True) 
                 self.Data[fn] = data
-                
-                shape = getInfo('dataset_info.json', "shape")
+                print(data.event_id)
 
+                # check shape consistency
+                shape = getInfo('dataset_info.json', "shape")
                 if shape == []:
                     shape= list(data._data.shape)
-                if shape != data._data.shape:
+                elif shape != data._data.shape:
                     raise ValueError('Data shape inconsistent: should be %s'%(str(shape)))
+
+                # check event_id consistency
+                # 這樣是先全部讀完再一起編輯?
+                eventIdDict = getInfo('dataset_info.json', "event_ids")
+                if eventIdDict == {}:
+                    saveInfo('dataset_info.json', "event_ids", data.event_id)
+                elif eventIdDict != data.event_id:
+                    raise ValueError('Event Id inconsistent')
+                
             except OSError as e: # failed to open file?
                 print(repr(e))
             except ValueError as e: #shape inconsistent
@@ -156,20 +176,27 @@ class database:
         read contents from labelFileNames list and store into self.Label component
         """
         labelFileList = getInfo('dataset_info.json', "labelFileNames")
-        for fn in labelFileList:
-            try:    
+        for lfn in labelFileList:
+            try:
                 # 問一下label file type & format
-                if '.mat' in fn: 
-                    label = scipy.io.loadmat(fn)
-                if '.txt' in fn: 
+                if '.mat' in lfn: 
+                    label = scipy.io.loadmat(lfn)
+                elif '.txt' in lfn: 
                     fp = open(fn)
                     label = fp.read().split('\n')
-                    fp.close()
-
-                self.Label[fn] = label
-            except OSError as e:
+                    fp.close() 
+                self.Label[lfn] = label
+                
+                shape = getInfo('dataset_info.json', "shape")
+                if shape == []:
+                    shape= [list(label._data.shape)[1], 1]
+                if shape != [list(label._data.shape)[1], 1]:
+                    raise ValueError('Label data shape inconsistent: should be %s'%(str(shape)))
+                
+            except OSError as e: # failed to open file?
                 print(repr(e))
-
+            except ValueError as e: #shape inconsistent
+                print(repr(e))
         print('label', self.Label)
 
-        
+    
