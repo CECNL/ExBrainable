@@ -1,0 +1,8 @@
+{
+    "channels": 22,
+    "batch size": 32,
+    "epochs": 100,
+    "learning rate": 0.001
+
+
+}
