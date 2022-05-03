@@ -147,7 +147,7 @@ class database:
                     data = mne.io.read_epochs_eeglab(fn, uint16_codec='latin1') 
                 elif '.edf' in fn: 
                     data= mne.io.read_raw_edf(fn,preload= True) 
-                self.Data[fn] = data
+                self.Data[fn.split('/')[-1]] = data
                 print(data.event_id)
 
                 # check shape consistency
@@ -174,6 +174,7 @@ class database:
     def setLabel(self):
         """
         read contents from labelFileNames list and store into self.Label component
+        update to data(raw/epochs elements)?
         """
         labelFileList = getInfo('dataset_info.json', "labelFileNames")
         for lfn in labelFileList:
@@ -182,7 +183,7 @@ class database:
                 if '.mat' in lfn: 
                     label = scipy.io.loadmat(lfn)
                 elif '.txt' in lfn: 
-                    fp = open(fn)
+                    fp = open(lfn)
                     label = fp.read().split('\n')
                     fp.close() 
                 self.Label[lfn] = label

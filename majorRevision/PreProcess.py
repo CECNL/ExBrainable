@@ -27,8 +27,13 @@ def reference(dataset, base):
     except ValueError as e:
         print(repr(e))
 
-def filter(hf=0, lf=0):
-
+def filter(dataset, rs=None, hf=None, lf=None):
+    if(rs):
+        for key,value in dataset:
+            value.resample(rs)
+    if(hf or lf):
+        for key,value in dataset:
+            value.filter(l_freq=lf, h_freq=hf)
     return
 
 def epoching():
