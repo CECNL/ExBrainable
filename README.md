@@ -27,7 +27,7 @@ See our preprint on ArXiv: https://arxiv.org/abs/2201.04065
 Here is a brief video demonstration of ExBrainable: https://youtu.be/m40z2klbmtg
 
 ## Dataset
-The BCI Competition IV 2a dataset used in our paper is available on: https://www.bbci.de/competition/iv/
+The BCI Competition IV 2a dataset used in our paper is available on: https://www.bbci.de/competition/iv/. 
 Example data used in the demo video can be downloaded here: https://drive.google.com/drive/folders/1-M-ZU1BbfwdiFP-jkPcCfu058fRzksSI?usp=sharing
 
 ## Citing
