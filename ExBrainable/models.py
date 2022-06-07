@@ -1,6 +1,27 @@
 # Authors: Ya-Lin Huang <yalinhuang.bt06@nycu.edu.tw>
 #          Xin-Yao Huang <masaga.cs05@nctu.edu.tw>
 
+# References:
+#
+# (EEGNet)
+# V.J.Lawhern,A.J.Solon,N.R.Waytowich,S.M.Gordon,C.P.Hung,
+# and B. J. Lance, “Eegnet: a compact convolutional neural 
+# network for eeg-based brain–computer interfaces,” J. Neural 
+# Eng., vol. 15, no. 5, p. 056013, 2018.
+#
+# (ShallowConvNet)
+# R. T. Schirrmeister et al., “Deep learning with convolutional neural 
+# networks for eeg decoding and visualization,” Hum. Brain Mapp., aug 
+# 2017. [Online]. Available: http://dx.doi.org/10.1002/hbm.23730
+#
+# (SCCNet)
+# C.-S. Wei, T. Koike-Akino, and Y. Wang, “Spatial component-wise 
+# convolutional network (SCCNet) for motor-imagery EEG classification,”
+# in 9th Int. IEEE EMBS Conf. Neural Eng. IEEE, 2019, pp. 328–331.
+#
+
+
+
 import torch
 import torch.nn as nn
 import math
