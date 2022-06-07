@@ -54,4 +54,49 @@ doi={10.3389/fnins.2013.00267},
 issn={1662-453X},
 }
 ```
-as well as any model provided in the model base (see model.py for references).
+If you use the EEGNet model, please cite the following:
+```bash
+@article{Lawhern2018,
+  author={Vernon J Lawhern and Amelia J Solon and Nicholas R Waytowich and Stephen M Gordon and Chou P Hung and Brent J Lance},
+  title={EEGNet: a compact convolutional neural network for EEG-based brain–computer interfaces},
+  journal={Journal of Neural Engineering},
+  volume={15},
+  number={5},
+  pages={056013},
+  url={http://stacks.iop.org/1741-2552/15/i=5/a=056013},
+  year={2018}
+}
+```
+If you use the ShalowConvNet model, please cite the following:
+```bash
+@article{hbm23730,
+author = {Schirrmeister Robin Tibor and 
+          Springenberg Jost Tobias and 
+          Fiederer Lukas Dominique Josef and 
+          Glasstetter Martin and 
+          Eggensperger Katharina and 
+          Tangermann Michael and 
+          Hutter Frank and 
+          Burgard Wolfram and 
+          Ball Tonio},
+title = {Deep learning with convolutional neural networks for EEG decoding and visualization},
+journal = {Human Brain Mapping},
+volume = {38},
+number = {11},
+pages = {5391-5420},
+keywords = {electroencephalography, EEG analysis, machine learning, end‐to‐end learning, brain–machine interface, brain–computer interface, model interpretability, brain mapping},
+doi = {10.1002/hbm.23730},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/hbm.23730}
+}
+```
+If you use the SCCNet model, please cite the following:
+```bash
+@inproceedings{wei2019spatial,
+  title={Spatial component-wise convolutional network (SCCNet) for motor-imagery EEG classification},
+  author={Wei, Chun-Shu and Koike-Akino, Toshiaki and Wang, Ye},
+  booktitle={2019 9th International IEEE/EMBS Conference on Neural Engineering (NER)},
+  pages={328--331},
+  year={2019},
+  organization={IEEE}
+}
+```
