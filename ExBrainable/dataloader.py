@@ -3,8 +3,7 @@
 
 import torch
 import torch.utils.data as Data
-#from . import scheme_var
-import scheme_var
+from . import scheme_var
 
 def Individual_Dataset(FT= False):
 

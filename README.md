@@ -10,9 +10,9 @@ We developed a graphic user interface (GUI), ExBrainable, which is dedicated to 
 ```bash
 pip install ExBrainable
 ```
-4. Run GUI.py
+4. Run ExBrainable
 ```bash
-python GUI.py
+ExBrainable
 ```
 If you use conda, create and activate an environment for ExBrainable with:
 ```bash

@@ -11,18 +11,11 @@ import scipy.io
 import io
 import sys
 
-from visualization import *
-from dataloader import Individual_Dataset
-from train_test import Test, Scheme
-import variable
-import scheme_var
-
-
-# from .visualization import *
-# from .dataloader import Individual_Dataset
-# from . import variable
-# from . import scheme_var
-# from .train_test import Test, Scheme
+from .visualization import *
+from .dataloader import Individual_Dataset
+from . import variable
+from . import scheme_var
+from .train_test import Test, Scheme
 
 
 #====================== Main========================
@@ -375,7 +368,7 @@ def load_model_struct():
 def model_select(win_lms, modelist):
     import os
     file_path = os.path.dirname(os.path.realpath(__file__))
-    exec(open(os.path.join(file_path + '/models.py')).read(), globals()) #put all variable to globals()
+    exec(open(os.path.join(file_path + '/models.py'),encoding="utf-8").read(), globals()) #put all variable to globals()
     name = modelist.get()
     print(name)
     scheme_var.netname= eval(str(name+'()'))

@@ -3,19 +3,24 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-with open(path.join(here, "README.md"),"r") as fh:
+with open(path.join(here, "README.md"),"r",encoding="utf-8") as fh:
     long_description = fh.read()
 
 
 
 setuptools.setup(
-     name='ExBrainable',  
-     version='0.0.10',  
+     name='ExBrainable',
+     version='0.0.11',  
      author="Ya-Lin Huang", 
      author_email="yalinhuang.bt06@nycu.edu.tw",
      description="ExBrainable: An Open-Source GUI for CNN-based EEG Decoding and Model Interpretation",
      long_description=long_description,
      long_description_content_type="text/markdown",
+     entry_points={
+        'console_scripts': [
+            'ExBrainable=ExBrainable.GUI:main'
+        ]
+     },
      url="https://github.com/CECNL/ExBrainable",
      install_requires=['mne', 'numpy', 'scipy', 'matplotlib','torchsummary', 'sklearn'],
      packages=setuptools.find_packages(), #Use for other package dependencies.
