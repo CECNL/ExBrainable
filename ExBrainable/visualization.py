@@ -159,8 +159,8 @@ def Spatial_kernel(montage, electrode):
 
     for i in range(int(5*np.ceil(pos_count/5))):
         if i < scheme_var.ch:
-            print(conv1[i:].shape)
-            mne.viz.plot_topomap(data=conv1[i:].squeeze(),
+            print(conv1[i,:].shape)
+            mne.viz.plot_topomap(data=conv1[i, :],
                                 pos=position[:,0:2],
                                 axes= axes[int(i/5), i%5],
                                 show=False,

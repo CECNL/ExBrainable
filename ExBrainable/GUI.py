@@ -692,7 +692,7 @@ def Model_Preparation():
 def save_weight_folder(win_p, entry):
     global shortfolder
     folder= tk.filedialog.askdirectory(parent=win_p)
-    shortfolder= os.path.join(folder.split('/')[-3:])
+    shortfolder= "/".join(folder.split('/')[-3:])
     entry.insert(tk.END, folder)
     scheme_var.saveweightfolder= folder    
 
