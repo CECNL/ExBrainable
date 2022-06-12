@@ -108,8 +108,7 @@ def main():
     filemenu = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(label='File ', menu=filemenu)
     filemenu.add_command(label='Load Data', command=lambda:Load_dataset())
-    filemenu.add_command(label='Load Model Weight', command=lambda:Weightname)
-    filemenu.add_command(label='Study(cross subject)', command=lambda:load_files())
+    filemenu.add_command(label='Load Model Weight', command=lambda:Weightname())
 
     # Menu-Model
     Model = tk.Menu(menubar, tearoff=0)
@@ -185,10 +184,10 @@ def Load_dataset():
 
     
        #load train test path by bottom
-    ttk.Button(w_load, text="File", command=(lambda:path2entry(x_train, 'x_train')), width=10).grid(row=0,column=2,padx=10)
-    ttk.Button(w_load, text="File", command=(lambda:path2entry(y_train,'y_train')), width=10).grid(row=1,column=2,padx=10)
-    ttk.Button(w_load, text="File", command=(lambda:path2entry(x_test,'x_test')), width=10).grid(row=2,column=2,padx=10)
-    ttk.Button(w_load, text="File", command=(lambda:path2entry(y_test, 'y_test')), width=10).grid(row=3,column=2,padx=10)
+    ttk.Button(w_load, text="File", command=(lambda:path2entry(w_load, x_train, 'x_train')), width=10).grid(row=0,column=2,padx=10)
+    ttk.Button(w_load, text="File", command=(lambda:path2entry(w_load, y_train,'y_train')), width=10).grid(row=1,column=2,padx=10)
+    ttk.Button(w_load, text="File", command=(lambda:path2entry(w_load, x_test,'x_test')), width=10).grid(row=2,column=2,padx=10)
+    ttk.Button(w_load, text="File", command=(lambda:path2entry(w_load, y_test, 'y_test')), width=10).grid(row=3,column=2,padx=10)
     #ttk.Button(w, text="Select ", command=(lambda:montage_select(w)), width=10).grid(row=8,column=2)
 
 
@@ -198,8 +197,8 @@ def Load_dataset():
 
 
 #####load xy dataset and check size#############
-def path2entry(entry, set_type):
-    path = tk.filedialog.askopenfilename()
+def path2entry(root, entry, set_type):
+    path = tk.filedialog.askopenfilename(parent=w_load)
     entry.insert(tk.END, path)
     data= read_path(path, set_type)
     identify_path_type(path, set_type) #identify path 
@@ -386,21 +385,6 @@ def model_select(win_lms, modelist):
     win_lms.destroy()
 
 # File- study
-
-
-def load_files():
-    global btn
-    w_files=new_window(Title='Cross subject study', size='500x450', x_pad=-10, y_pad=10)
-
-    xframes = tk.LabelFrame(w_files, text="Data", height=10, bg='White', width=50, labelanchor='n')
-    xframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-    yframes = tk.LabelFrame(w_files, text="Labels", height=10, bg='White', width=50, labelanchor='n')
-    yframes.pack(fill='both', ipadx=1 ,ipady= 10,padx=20 ,pady= 18)
-
-    ttk.Button(xframes, text='Add Files', command=(lambda:read_data_path(xframes, 'x_train')), width=10).pack()
-    ttk.Button(yframes, text='Add Files', command=(lambda:read_data_path(yframes, 'y_train')), width=10).pack()
-   
-    Confirm = ttk.Button(w_files ,text="Confirm", command=(lambda:rename_events(w_files)), width=10).pack()
 
 def read_data_path(frame, set_type):
     global concat_data, event_ids, subname, sublen
@@ -699,13 +683,13 @@ def Model_Preparation():
     Lr.grid(row=3, column=1)
     Save_weight.grid(row=4, column=1)
 
-    weightfolder= ttk.Button(win_p, text="Folder", command=(lambda:save_weight_folder(Save_weight)), width=10).grid(row=4,column=2)
+    weightfolder= ttk.Button(win_p, text="Folder", command=(lambda:save_weight_folder(win_p, Save_weight)), width=10).grid(row=4,column=2)
 
     Confirm = ttk.Button(win_p ,text="Confirm", command=(lambda:show_para(win_p,Valratio, Batchsize, Epoch, Lr)), width=10).grid(row=6, column=1)
 
-def save_weight_folder(entry):
+def save_weight_folder(win_p, entry):
     global shortfolder
-    folder= tk.filedialog.askdirectory()
+    folder= tk.filedialog.askdirectory(parent=win_p)
     shortfolder= "/".join(folder.split('/')[-3:])
     entry.insert(tk.END, folder)
     scheme_var.saveweightfolder= folder    
@@ -918,7 +902,7 @@ def new_window(Title, size, x_pad, y_pad):
     win_main_y = win_main.winfo_rooty()+ y_pad
 
     newindow= tk.Toplevel()
-    newindow.wm_attributes('-topmost', True )
+    # newindow.wm_attributes('-topmost', True )
     newindow.geometry(size)
     newindow.geometry(f'+{win_main_x}+{win_main_y}')  
     newindow.title(Title)
