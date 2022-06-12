@@ -373,7 +373,9 @@ def load_model_struct():
     Confirm.pack()
 
 def model_select(win_lms, modelist):
-    exec(open('./ExBrainable/ExBrainable/models.py').read(), globals()) #put all variable to globals()
+    import os
+    file_path = os.path.dirname(os.path.realpath(__file__))
+    exec(open(os.path.join(file_path + '/models.py')).read(), globals()) #put all variable to globals()
     name = modelist.get()
     print(name)
     scheme_var.netname= eval(str(name+'()'))
@@ -690,7 +692,7 @@ def Model_Preparation():
 def save_weight_folder(win_p, entry):
     global shortfolder
     folder= tk.filedialog.askdirectory(parent=win_p)
-    shortfolder= "/".join(folder.split('/')[-3:])
+    shortfolder= os.path.join(folder.split('/')[-3:])
     entry.insert(tk.END, folder)
     scheme_var.saveweightfolder= folder    
 
