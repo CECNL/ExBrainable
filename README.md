@@ -8,16 +8,18 @@ We developed a graphic user interface (GUI), ExBrainable, which is dedicated to 
 2. Install Pytorch >= 1.0 from http://pytorch.org/ 
 3. Use the package manager pip to install ExBrainable
 ```bash
-pip install ExBrainable
+$ pip install ExBrainable
 ```
 4. Run ExBrainable
 ```bash
-ExBrainable
+$ ExBrainable
 ```
-If you use conda, create and activate an environment for ExBrainable with:
+To get the latest code using git and conda, open a terminal and type:
 ```bash
-conda env create -f environment.yml 
-conda activate ExBrainable 
+$ git clone https://github.com/CECNL/ExBrainable
+$ cd ExBrainable
+$ conda env create -f environment.yml 
+$ conda activate ExBrainable 
 ```
 
 ## Documentation
